@@ -33,7 +33,7 @@ services:
       - APP_NAME=${APP_NAME:-HaloMonitor}
       - APP_TIMEZONE=${APP_TIMEZONE:-America/Mexico_City}
       - DB_HOST=db
-      - DB_PORT=${DB_PORT:-3306}
+      - DB_PORT=3306
       - DB_NAME=${DB_NAME:-halomonitor_db}
       - DB_USER=${DB_USER:-halouser}
       - DB_PASSWORD=${DB_PASSWORD:-HaloPass2026!}
@@ -47,12 +47,13 @@ services:
       - halomonitor-net
 
   # 3. Capa de Persistencia: Base de Datos Relacional (MySQL 8.0)
+  # Mapea en el host al puerto 3307 para evitar conflictos con MySQL/XAMPP local del usuario (puerto 3306)
   db:
     image: mysql:8.0
     container_name: halomonitor-db
     restart: unless-stopped
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "${DB_PORT:-3307}:3306"
     environment:
       - MYSQL_DATABASE=${DB_NAME:-halomonitor_db}
       - MYSQL_USER=${DB_USER:-halouser}
@@ -62,16 +63,15 @@ services:
       - halomonitor-db-data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER:-halouser}", "-p${DB_PASSWORD:-HaloPass2026!}"]
-      interval: 10s
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 8s
       timeout: 5s
-      retries: 5
+      retries: 6
       start_period: 15s
     networks:
       - halomonitor-net
 
   # 4. Servicio Opcional MongoDB (Perfil 'mongo')
-  # Permite demostración NoSQL alternativa solicitada por el usuario
   mongodb:
     image: mongo:7.0
     container_name: halomonitor-mongo

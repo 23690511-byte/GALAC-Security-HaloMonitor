@@ -33,14 +33,16 @@ function getDatabaseConnection(): PDO {
         $pdo = new PDO($dsn, $user, $pass, $options);
         return $pdo;
     } catch (PDOException $e) {
-        // En caso de que se ejecute fuera de docker para pruebas locales, intentar con 127.0.0.1
+        // En caso de que se ejecute fuera de docker para pruebas locales, intentar con 127.0.0.1 y puertos 3307 / 3306
         if ($host === 'db') {
-            try {
-                $dsnFallback = "mysql:host=127.0.0.1;port={$port};dbname={$dbname};charset={$charset}";
-                $pdo = new PDO($dsnFallback, $user, $pass, $options);
-                return $pdo;
-            } catch (PDOException $fallbackEx) {
-                // Continuar hacia el fallo controlado
+            foreach (['3307', '3306'] as $p) {
+                try {
+                    $dsnFallback = "mysql:host=127.0.0.1;port={$p};dbname={$dbname};charset={$charset}";
+                    $pdo = new PDO($dsnFallback, $user, $pass, $options);
+                    return $pdo;
+                } catch (PDOException $fallbackEx) {
+                    // Continuar probando
+                }
             }
         }
 
