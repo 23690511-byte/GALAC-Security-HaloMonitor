@@ -1,107 +1,73 @@
 <template>
-  <aside class="w-60 bg-[#091224] border-r border-sky-950/80 flex flex-col shrink-0 h-screen sticky top-0 select-none z-30">
-    <!-- Brand / Logotipo Oficial GALAC Security (Mockup Figura 2.2) -->
-    <div class="p-4 border-b border-sky-950/80 flex items-center gap-3">
-      <!-- Escudo Cibernético Compacto -->
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border border-cyan-400/50 flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(0,242,254,0.35)] shrink-0">
-        <svg class="w-full h-full text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <rect x="9" y="11" width="6" height="5" rx="1" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M10 11V9a2 2 0 0 1 4 0v2" stroke="currentColor" stroke-width="1.5"/>
+  <aside class="sidebar-wrapper select-none">
+    <!-- Brand / Logotipo Oficial GALAC Security -->
+    <div class="sidebar-brand">
+      <div class="brand-shield-icon">
+        <svg class="brand-svg" viewBox="0 0 24 24" fill="none">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#2563eb" />
+          <path d="M9 12l2 2 4-4" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
 
-      <div class="leading-none">
-        <div class="text-[10px] tracking-[0.25em] text-cyan-400 font-extrabold uppercase">GALAC</div>
-        <div class="text-sm font-black text-white tracking-wide mt-0.5">SECURITY</div>
+      <div class="brand-text">
+        <span class="brand-name">GALAC</span>
+        <span class="brand-sub">SECURITY &bull; SOC</span>
       </div>
     </div>
 
-    <!-- Menú de Navegación Vertical (Mockup Oficial Figura 2.2) -->
-    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+    <!-- Menú de Navegación Vertical -->
+    <nav class="sidebar-nav">
       <!-- 1. Dashboard -->
-      <router-link 
-        to="/dashboard" 
-        class="sidebar-item"
-        active-class="sidebar-item-active"
-      >
-        <svg class="w-4 h-4 shrink-0 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <router-link to="/dashboard" class="nav-item" active-class="nav-item-active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
         </svg>
         <span>Dashboard</span>
       </router-link>
 
       <!-- 2. Gestión de Incidentes -->
-      <router-link 
-        to="/incidents" 
-        class="sidebar-item"
-        active-class="sidebar-item-active"
-      >
-        <svg class="w-4 h-4 shrink-0 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <router-link to="/incidents" class="nav-item" active-class="nav-item-active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         <span>Gestión de Incidentes</span>
       </router-link>
 
-      <!-- 3. Alertas Internas (Solo Admin y Analista) -->
-      <router-link 
-        v-if="hasRole(['Administrador', 'Analista'])"
-        to="/alerts" 
-        class="sidebar-item"
-        active-class="sidebar-item-active"
-      >
-        <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- 3. Alertas Internas -->
+      <router-link v-if="hasRole(['Administrador', 'Analista'])" to="/alerts" class="nav-item" active-class="nav-item-active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
-        <span class="flex-1">Alertas Internas</span>
-        <span v-if="unreadAlertsCount > 0" class="ml-auto px-1.5 py-0.2 bg-rose-500/90 text-white text-[10px] font-bold rounded-full">
-          {{ unreadAlertsCount }}
-        </span>
+        <span class="nav-label">Alertas Internas</span>
+        <span v-if="unreadAlertsCount > 0" class="badge-unread">{{ unreadAlertsCount }}</span>
       </router-link>
 
       <!-- 4. Reportes e Historial -->
-      <router-link 
-        to="/reports" 
-        class="sidebar-item"
-        active-class="sidebar-item-active"
-      >
-        <svg class="w-4 h-4 shrink-0 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <router-link to="/reports" class="nav-item" active-class="nav-item-active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
         </svg>
         <span>Reportes e Historial</span>
       </router-link>
 
-      <!-- 5. Métricas de Calidad (PDF 3) -->
-      <router-link 
-        to="/quality" 
-        class="sidebar-item"
-        active-class="sidebar-item-active"
-      >
-        <svg class="w-4 h-4 shrink-0 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- 5. Métricas de Calidad -->
+      <router-link to="/quality" class="nav-item" active-class="nav-item-active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
         </svg>
         <span>Métricas de Calidad</span>
       </router-link>
     </nav>
 
-    <!-- Pie de Sidebar: Perfil y Logout -->
-    <div class="p-3 border-t border-sky-950/80 bg-[#070e1c]">
-      <div class="flex items-center justify-between gap-2">
-        <div class="truncate">
-          <div class="text-xs font-semibold text-white truncate leading-tight">{{ user?.nombre || 'Usuario' }}</div>
-          <div class="flex items-center gap-1 mt-0.5">
-            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase" :class="roleBadgeClass">
-              {{ user?.rol || 'Operador' }}
-            </span>
-          </div>
+    <!-- Pie del Sidebar: Usuario & Salir -->
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-details truncate">
+          <span class="user-name truncate">{{ user?.nombre || 'Usuario' }}</span>
+          <span class="user-role" :class="roleClass">{{ user?.rol || 'Operador' }}</span>
         </div>
-
-        <button 
-          @click="handleLogout" 
-          class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded transition-colors"
-          title="Cerrar sesión"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button @click="handleLogout" class="logout-btn" title="Cerrar sesión">
+          <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
         </button>
@@ -128,17 +94,16 @@ onMounted(async () => {
         unreadAlertsCount.value = res.data.unread_count || 0;
       }
     } catch {
-      // Valor por defecto
+      // Ignorar fallback
     }
   }
 });
 
-const roleBadgeClass = computed(() => {
+const roleClass = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
-  if (r.includes('admin')) return 'bg-purple-500/20 text-purple-300 border border-purple-500/40';
-  if (r.includes('analista')) return 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
-  if (r.includes('auditor')) return 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
-  return 'bg-slate-800 text-slate-300';
+  if (r.includes('admin')) return 'role-admin';
+  if (r.includes('analista')) return 'role-analista';
+  return 'role-auditor';
 });
 
 async function handleLogout() {
@@ -148,28 +113,182 @@ async function handleLogout() {
 </script>
 
 <style scoped>
-.sidebar-item {
+.sidebar-wrapper {
+  width: 220px;
+  background-color: #0f172a;
+  border-right: 1px solid rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  z-index: 30;
+}
+
+.sidebar-brand {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.brand-shield-icon {
+  width: 32px;
+  height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-svg {
+  width: 30px !important;
+  height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.brand-sub {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.1em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0.75rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.nav-item {
   display: flex;
   align-items: center;
   gap: 0.65rem;
   padding: 0.55rem 0.75rem;
-  font-size: 0.815rem;
-  font-weight: 500;
+  border-radius: 8px;
   color: #94a3b8;
-  border-radius: 6px;
+  font-size: 0.825rem;
+  font-weight: 500;
   text-decoration: none;
   transition: all 0.15s ease;
 }
 
-.sidebar-item:hover {
-  color: #00f2fe;
-  background: rgba(0, 242, 254, 0.08);
+.nav-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #38bdf8;
 }
 
-.sidebar-item-active {
-  color: #00f2fe;
-  background: rgba(0, 242, 254, 0.15);
+.nav-item-active {
+  background: #1e293b;
+  color: #ffffff;
   font-weight: 600;
-  border-left: 3px solid #00f2fe;
+  border-left: 3px solid #2563eb;
+}
+
+.nav-icon {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+  color: #38bdf8;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.badge-unread {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  margin-left: auto;
+}
+
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  background: #090f1d;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.user-role {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  text-transform: uppercase;
+}
+
+.role-admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+.role-analista { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+.role-auditor { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.logout-btn:hover {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.logout-icon {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
 }
 </style>

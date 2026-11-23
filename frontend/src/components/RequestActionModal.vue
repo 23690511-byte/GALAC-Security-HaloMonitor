@@ -1,31 +1,25 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="onCancel">
-    <div class="modal-content">
+  <div v-if="isOpen" class="modal-backdrop" @click.self="onCancel">
+    <div class="modal-dialog">
       <!-- Encabezado del Modal -->
-      <div class="flex items-center justify-between p-4 border-b border-cyan-500/20 bg-slate-900/60 rounded-t-xl">
-        <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="modal-head">
+        <h3 class="modal-title">
+          <svg class="modal-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          {{ title }}
+          <span>{{ title }}</span>
         </h3>
-        <button @click="onCancel" class="text-slate-400 hover:text-white p-1 rounded transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+        <button @click="onCancel" class="close-btn">&times;</button>
       </div>
 
       <!-- Cuerpo del Modal -->
-      <div class="p-5 space-y-4 text-sm text-slate-300">
-        <p v-if="description" class="text-slate-300 leading-relaxed">{{ description }}</p>
+      <div class="modal-body">
+        <p v-if="description" class="modal-desc">{{ description }}</p>
 
         <!-- Selector de Nuevo Estado (si aplica) -->
-        <div v-if="statusOptions && statusOptions.length > 0" class="space-y-1">
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Nuevo Estado de Gestión:
-          </label>
-          <select v-model="formData.newStatus" class="cyber-select">
+        <div v-if="statusOptions && statusOptions.length > 0" class="field-group">
+          <label class="field-label">Nuevo Estado de la Solicitud:</label>
+          <select v-model="formData.newStatus" class="saas-select">
             <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
             </option>
@@ -33,11 +27,9 @@
         </div>
 
         <!-- Asignación de Analista (si aplica) -->
-        <div v-if="analystOptions && analystOptions.length > 0" class="space-y-1">
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Asignar Operador / Analista SOC:
-          </label>
-          <select v-model="formData.assignedId" class="cyber-select">
+        <div v-if="analystOptions && analystOptions.length > 0" class="field-group">
+          <label class="field-label">Asignar Operador / Analista:</label>
+          <select v-model="formData.assignedId" class="saas-select">
             <option :value="null">-- Sin asignar --</option>
             <option v-for="an in analystOptions" :key="an.id" :value="an.id">
               {{ an.nombre }} ({{ an.email }})
@@ -45,50 +37,44 @@
           </select>
         </div>
 
-        <!-- Selector de Fecha/Hora Futura (SLA / Compromiso) -->
-        <div v-if="requireFutureDate" class="space-y-1">
-          <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-            Fecha / Hora Límite de Atención Futura (SLA):
-          </label>
+        <!-- Selector de Fecha/Hora Futura (SLA) -->
+        <div v-if="requireFutureDate" class="field-group">
+          <label class="field-label text-blue">Fecha y Hora Límite de Atención (SLA Futuro):</label>
           <input 
             type="datetime-local" 
             v-model="formData.futureDate" 
             :min="minDate"
-            class="cyber-input font-mono"
+            class="saas-input font-mono"
             required
           />
-          <p v-if="dateError" class="text-xs text-rose-400 mt-1">{{ dateError }}</p>
+          <span v-if="dateError" class="field-error">{{ dateError }}</span>
         </div>
 
         <!-- Captura de Motivo Obligatorio (Auditoría) -->
-        <div v-if="requireReason" class="space-y-1">
-          <label class="block text-xs font-semibold text-amber-400 uppercase tracking-wider">
-            Motivo / Comentario de Auditoría (Obligatorio):
-          </label>
+        <div v-if="requireReason" class="field-group">
+          <label class="field-label text-amber">Motivo / Justificación de la Acción (Obligatorio):</label>
           <textarea 
             v-model="formData.reason" 
             rows="3" 
-            placeholder="Describa detalladamente el motivo del cambio o resolución..." 
-            class="cyber-textarea"
+            placeholder="Describa el motivo del cambio para la bitácora inmutable..." 
+            class="saas-textarea"
             required
           ></textarea>
-          <p v-if="reasonError" class="text-xs text-rose-400 mt-1">{{ reasonError }}</p>
+          <span v-if="reasonError" class="field-error">{{ reasonError }}</span>
         </div>
       </div>
 
       <!-- Pie del Modal -->
-      <div class="flex items-center justify-end gap-3 p-4 border-t border-slate-800 bg-slate-900/50 rounded-b-xl">
-        <button type="button" @click="onCancel" class="btn-cyber-secondary text-sm">
-          Cancelar
-        </button>
+      <div class="modal-foot">
+        <button type="button" @click="onCancel" class="btn-secondary">Cancelar</button>
         <button 
           type="button" 
           @click="onConfirm" 
           :disabled="isSubmitting"
-          :class="confirmBtnClass"
+          class="btn-primary"
         >
-          <span v-if="isSubmitting" class="animate-spin inline-block mr-1">&#9696;</span>
-          {{ confirmText }}
+          <span v-if="isSubmitting">&#9696; Procesando...</span>
+          <span v-else>{{ confirmText }}</span>
         </button>
       </div>
     </div>
@@ -102,8 +88,7 @@ const props = defineProps({
   isOpen: { type: Boolean, default: false },
   title: { type: String, default: 'Confirmar Acción' },
   description: { type: String, default: '' },
-  confirmText: { type: String, default: 'Confirmar' },
-  confirmType: { type: String, default: 'primary' }, // 'primary', 'danger'
+  confirmText: { type: String, default: 'Confirmar Transacción' },
   requireReason: { type: Boolean, default: true },
   requireFutureDate: { type: Boolean, default: false },
   statusOptions: { type: Array, default: () => [] },
@@ -125,7 +110,6 @@ const formData = ref({
 const reasonError = ref('');
 const dateError = ref('');
 
-// Mínimo para fecha futura (ahora mismo)
 const minDate = computed(() => {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -145,10 +129,6 @@ watch(() => props.isOpen, (open) => {
   }
 });
 
-const confirmBtnClass = computed(() => {
-  return props.confirmType === 'danger' ? 'btn-cyber-danger text-sm' : 'btn-cyber-primary text-sm';
-});
-
 function onCancel() {
   emit('cancel');
 }
@@ -158,17 +138,17 @@ function onConfirm() {
   dateError.value = '';
 
   if (props.requireReason && !formData.value.reason.trim()) {
-    reasonError.value = 'El motivo de auditoría es obligatorio para garantizar la trazabilidad.';
+    reasonError.value = 'El motivo de auditoría es obligatorio para la trazabilidad.';
     return;
   }
 
   if (props.requireFutureDate) {
     if (!formData.value.futureDate) {
-      dateError.value = 'Debe seleccionar una fecha y hora límite válida.';
+      dateError.value = 'Debe indicar una fecha y hora límite.';
       return;
     }
-    const selectedTime = new Date(formData.value.futureDate).getTime();
-    if (selectedTime <= Date.now()) {
+    const selected = new Date(formData.value.futureDate).getTime();
+    if (selected <= Date.now()) {
       dateError.value = 'La fecha debe ser estrictamente en el futuro.';
       return;
     }
@@ -177,3 +157,89 @@ function onConfirm() {
   emit('confirm', { ...formData.value });
 }
 </script>
+
+<style scoped>
+.modal-head {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.modal-title-icon {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover { color: #ffffff; }
+
+.modal-body {
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-label {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.text-blue { color: #38bdf8; }
+.text-amber { color: #fbbf24; }
+
+.field-error {
+  font-size: 0.7rem;
+  color: #f87171;
+}
+
+.modal-foot {
+  padding: 0.85rem 1.15rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+</style>
