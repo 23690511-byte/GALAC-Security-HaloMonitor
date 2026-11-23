@@ -5,7 +5,7 @@
 CREATE DATABASE IF NOT EXISTS halomonitor_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE halomonitor_db;
 
--- 1. Tabla de Roles (RBAC: Administrador, Analista, Auditor)
+-- 1. Tabla de Roles (RBAC: Administrador, Analista, Auditor, Cliente)
 CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS sistemas_monitoreados (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. Tabla de Incidentes (Solicitudes de Ciberseguridad)
--- Con campos de congelamiento de estado y datos operativos al momento del registro
 CREATE TABLE IF NOT EXISTS incidentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     folio VARCHAR(30) NOT NULL UNIQUE,
@@ -55,8 +54,8 @@ CREATE TABLE IF NOT EXISTS incidentes (
     usuario_reporta_id INT NOT NULL,
     usuario_asignado_id INT NULL,
     costo_estimado DECIMAL(10,2) DEFAULT 0.00,
-    precio_contratado DECIMAL(10,2) DEFAULT 0.00, -- Valor congelado de SLA / costo operativo
-    datos_congelados JSON NULL,                  -- Snapshot inmutable de la configuración/precios al momento de la operación
+    precio_contratado DECIMAL(10,2) DEFAULT 0.00,
+    datos_congelados JSON NULL,
     fecha_limite_atencion DATETIME NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_cierre DATETIME NULL,
@@ -72,7 +71,6 @@ CREATE TABLE IF NOT EXISTS incidentes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 5. Tabla de Auditoría Inmutable: Historial de Incidentes / Solicitudes
--- Trazabilidad exacta de transiciones, bloqueos y snapshot inmutable
 CREATE TABLE IF NOT EXISTS historial_solicitud (
     id INT AUTO_INCREMENT PRIMARY KEY,
     incidente_id INT NOT NULL,
@@ -118,7 +116,7 @@ CREATE TABLE IF NOT EXISTS alertas (
     INDEX idx_alerta_fecha (fecha_emision)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. Bitácora de Auditoría del Sistema (Trazabilidad y Calidad CMMI / MoProSoft)
+-- 8. Bitácora de Auditoría del Sistema
 CREATE TABLE IF NOT EXISTS auditoria_sistema (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NULL,
@@ -132,21 +130,20 @@ CREATE TABLE IF NOT EXISTS auditoria_sistema (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- SEED DATA (Datos Iniciales)
--- Roles según especificación oficial del proyecto
 INSERT INTO roles (id, nombre, descripcion) VALUES
 (1, 'Administrador', 'Acceso Total (Full Access): Gestión de usuarios, alertas institucionales y configuración global'),
 (2, 'Analista', 'Acceso Operativo (Lectura / Escritura): Monitoreo de Dashboard, gestión y atención de incidentes'),
-(3, 'Auditor', 'Acceso Solo Lectura (Read-Only): Consulta de métricas, reportes ejecutivos e historiales')
-ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
+(3, 'Auditor', 'Acceso Solo Lectura (Read-Only): Consulta de métricas, reportes ejecutivos e historiales'),
+(4, 'Cliente', 'Cliente PyME: Registro de incidentes propios y seguimiento de tickets')
+ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), descripcion=VALUES(descripcion);
 
--- Usuarios por Defecto (Hash bcrypt para contraseñas de demostración)
--- Password 'Admin123!': $2y$10$WpQ8sY.4vFj6z7i9d2u.Oeu2qK7xU/k8u0z9s.A5nL3x7qK.o9eK (o generado con password_hash)
--- Utilizaremos hashes estándar generados con password_hash('Password123!', PASSWORD_BCRYPT)
+-- Usuarios por Defecto
 INSERT INTO usuarios (id, nombre, email, password_hash, rol_id, activo, departamento) VALUES
 (1, 'Gerardo Axel Castillo (Admin)', 'admin@halomonitor.com', '$2y$10$Ww4rR9GvD20v8M9O6H8eOuyN.l1bY9zJ8aU6P3tL5w0cT.x4g1N8m', 1, 1, 'Dirección de Seguridad'),
 (2, 'Luis Roberto Martínez (Analista)', 'analista@halomonitor.com', '$2y$10$Ww4rR9GvD20v8M9O6H8eOuyN.l1bY9zJ8aU6P3tL5w0cT.x4g1N8m', 2, 1, 'Operaciones SOC'),
-(3, 'Carlos Reyes Manuel (Auditor)', 'auditor@halomonitor.com', '$2y$10$Ww4rR9GvD20v8M9O6H8eOuyN.l1bY9zJ8aU6P3tL5w0cT.x4g1N8m', 3, 1, 'Auditoría y Cumplimiento')
-ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
+(3, 'Carlos Reyes Manuel (Auditor)', 'auditor@halomonitor.com', '$2y$10$Ww4rR9GvD20v8M9O6H8eOuyN.l1bY9zJ8aU6P3tL5w0cT.x4g1N8m', 3, 1, 'Auditoría y Cumplimiento'),
+(4, 'Empresa PyME Demo (Cliente)', 'cliente@pyme.com', '$2y$10$Ww4rR9GvD20v8M9O6H8eOuyN.l1bY9zJ8aU6P3tL5w0cT.x4g1N8m', 4, 1, 'Finanzas y Operaciones')
+ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), rol_id=VALUES(rol_id);
 
 -- Sistemas de Ejemplo
 INSERT INTO sistemas_monitoreados (id, nombre, ip_host, tipo, estado, tiempo_respuesta_ms) VALUES
@@ -165,18 +162,18 @@ INSERT INTO reglas_alertas (id, nombre, criterio_gravedad, disparar_notificacion
 (4, 'Falla de Disponibilidad en Servidor Crítico', 'Critical', 1, 1, 1)
 ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
 
--- Incidentes Semilla (Basados en el mockup y requisitos)
+-- Incidentes Semilla
 INSERT INTO incidentes (id, folio, titulo, descripcion, categoria, gravedad, estado, sistema_id, usuario_reporta_id, usuario_asignado_id, costo_estimado, precio_contratado, datos_congelados, fecha_limite_atencion, fecha_registro) VALUES
-(1, 'INC-2026-001', 'Malware Detectado en Endpoint Contabilidad', 'Se detectó ejecución sospechosa de script PowerShell y archivo binario con firma maliciosa.', 'Malware', 'Critical', 'Open', 1, 1, 2, 8500.00, 8500.00, '{"sla_horas": 2, "impacto": "Alto", "tarifa_hora": 150.00, "activo_critico": true}', DATE_ADD(NOW(), INTERVAL 2 HOUR), NOW()),
-(2, 'INC-2026-002', 'Intento Login Fallido Recurrente (Brute Force)', 'Más de 150 intentos de autenticación fallidos con usuario admin desde IP 45.33.32.156 en 5 minutos.', 'Intrusión', 'Medium', 'InProgress', 2, 1, 2, 3200.00, 3200.00, '{"sla_horas": 8, "impacto": "Medio", "tarifa_hora": 100.00, "activo_critico": false}', DATE_ADD(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(1, 'INC-2026-001', 'Malware Detectado en Endpoint Contabilidad', 'Se detectó ejecución sospechosa de script PowerShell y archivo binario con firma maliciosa.', 'Malware', 'Critical', 'Open', 1, 4, 2, 8500.00, 8500.00, '{"sla_horas": 2, "impacto": "Alto", "tarifa_hora": 150.00, "activo_critico": true}', DATE_ADD(NOW(), INTERVAL 2 HOUR), NOW()),
+(2, 'INC-2026-002', 'Intento Login Fallido Recurrente (Brute Force)', 'Más de 150 intentos de autenticación fallidos con usuario admin desde IP 45.33.32.156 en 5 minutos.', 'Intrusión', 'Medium', 'InProgress', 2, 4, 2, 3200.00, 3200.00, '{"sla_horas": 8, "impacto": "Medio", "tarifa_hora": 100.00, "activo_critico": false}', DATE_ADD(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)),
 (3, 'INC-2026-003', 'Puerto Inseguro Escaneado (Puerto 22 y 3389)', 'Actividad de escaneo SYN detectada contra puertos de administración remota expuestos.', 'Escaneo', 'Low', 'Resolved', 3, 2, 2, 1200.00, 1200.00, '{"sla_horas": 24, "impacto": "Bajo", "tarifa_hora": 80.00, "activo_critico": false}', DATE_ADD(NOW(), INTERVAL 18 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)),
 (4, 'INC-2026-004', 'Exfiltración Sospechosa de Tráfico DNS', 'Consultas DNS anómalas con payloads codificados en Base64 dirigidas a servidor externo desconocido.', 'Fuga de Datos', 'Critical', 'Open', 4, 1, NULL, 12000.00, 12000.00, '{"sla_horas": 1, "impacto": "Crítico", "tarifa_hora": 200.00, "activo_critico": true}', DATE_ADD(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 30 MINUTE))
 ON DUPLICATE KEY UPDATE folio=VALUES(folio);
 
 -- Historial Semilla
 INSERT INTO historial_solicitud (incidente_id, usuario_id, estado_anterior, estado_nuevo, comentario, datos_congelados, ip_origen) VALUES
-(1, 1, NULL, 'Open', 'Creación y registro formal del incidente por sistema IDS perimetral.', '{"costo": 8500.00}', '127.0.0.1'),
-(2, 1, NULL, 'Open', 'Apertura de ticket tras detección de anomalías de autenticación.', '{"costo": 3200.00}', '127.0.0.1'),
+(1, 4, NULL, 'Open', 'Creación y registro formal del incidente reportado por el Cliente PyME.', '{"costo": 8500.00}', '127.0.0.1'),
+(2, 4, NULL, 'Open', 'Apertura de ticket de anomalías por el Cliente PyME.', '{"costo": 3200.00}', '127.0.0.1'),
 (2, 2, 'Open', 'InProgress', 'Analista asignado inicia bloqueo preventivo de IP y análisis de bitácoras.', '{"costo": 3200.00}', '127.0.0.1'),
 (3, 2, NULL, 'Open', 'Registro de evento de escaneo de puertos.', '{"costo": 1200.00}', '127.0.0.1'),
 (3, 2, 'Open', 'InProgress', 'Revisión de reglas de firewall perimetral.', '{"costo": 1200.00}', '127.0.0.1'),
