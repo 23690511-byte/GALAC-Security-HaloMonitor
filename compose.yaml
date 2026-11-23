@@ -1,0 +1,98 @@
+# HaloMonitor - Orquestación de Contenedores Docker (compose.yaml)
+# GALAC Security - Plataforma Web de Monitoreo e Incidentes de Ciberseguridad
+# Entorno aislado en 3 contenedores principales (Frontend, Backend, DB)
+
+services:
+  # 1. Capa de Presentación: Frontend (Vue 3 + Vite + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: halomonitor-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - halomonitor-net
+
+  # 2. Capa de Aplicación: Backend (PHP 8.2 + Apache + PDO MySQL)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: halomonitor-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:80"
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - APP_NAME=${APP_NAME:-HaloMonitor}
+      - APP_TIMEZONE=${APP_TIMEZONE:-America/Mexico_City}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-halomonitor_db}
+      - DB_USER=${DB_USER:-halouser}
+      - DB_PASSWORD=${DB_PASSWORD:-HaloPass2026!}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - halomonitor-net
+
+  # 3. Capa de Persistencia: Base de Datos Relacional (MySQL 8.0)
+  db:
+    image: mysql:8.0
+    container_name: halomonitor-db
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      - MYSQL_DATABASE=${DB_NAME:-halomonitor_db}
+      - MYSQL_USER=${DB_USER:-halouser}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-HaloPass2026!}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-RootHalo2026!}
+    volumes:
+      - halomonitor-db-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER:-halouser}", "-p${DB_PASSWORD:-HaloPass2026!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - halomonitor-net
+
+  # 4. Servicio Opcional MongoDB (Perfil 'mongo')
+  # Permite demostración NoSQL alternativa solicitada por el usuario
+  mongodb:
+    image: mongo:7.0
+    container_name: halomonitor-mongo
+    profiles: ["mongo"]
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=halomonitor_db
+    volumes:
+      - halomonitor-mongo-data:/data/db
+      - ./database/mongo_init.js:/docker-entrypoint-initdb.d/mongo_init.js:ro
+    networks:
+      - halomonitor-net
+
+networks:
+  halomonitor-net:
+    driver: bridge
+
+volumes:
+  halomonitor-db-data:
+    driver: local
+  halomonitor-mongo-data:
+    driver: local
