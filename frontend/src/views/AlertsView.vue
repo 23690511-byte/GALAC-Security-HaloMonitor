@@ -1,204 +1,161 @@
 <template>
-  <div class="space-y-6">
-    <!-- Encabezado de Página -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+  <div class="space-y-3 max-w-full">
+    <!-- Encabezado de Página Compacto -->
+    <div class="flex items-center justify-between gap-2 pb-1 border-b border-sky-950/80">
       <div>
-        <h1 class="text-2xl font-black text-white flex items-center gap-2">
-          <span class="w-2.5 h-6 bg-cyan-400 rounded-sm inline-block"></span>
+        <h1 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-1.5 h-3.5 bg-cyan-400 rounded-sm inline-block"></span>
           Motor de Alertas Internas (SOC Alarms)
         </h1>
-        <p class="text-xs text-slate-400 mt-1 font-mono">
-          Detección Oportuna &bull; Reglas Automatizadas de Notificación Visual ante Incidentes Críticos
-        </p>
+        <span class="text-[10px] text-slate-400 font-mono">Disparo Automático ante Criticidad High/Critical</span>
       </div>
 
       <div class="flex items-center gap-2">
         <button 
           v-if="alerts.some(a => !a.leida)" 
           @click="markAllRead" 
-          class="btn-cyber-secondary text-xs py-1.5 px-3"
+          class="btn-cyber-secondary text-xs py-1 px-2.5"
         >
-          Marcar Todas como Leídas
+          Marcar Todas Leídas
         </button>
 
         <button 
           v-if="hasRole(['Administrador'])" 
           @click="showRuleModal = true" 
-          class="btn-cyber-primary text-xs py-1.5 px-3"
+          class="btn-cyber-primary text-xs py-1 px-2.5"
         >
-          + Nueva Regla de Alerta
+          + Nueva Regla
         </button>
       </div>
     </div>
 
-    <!-- Filtro Rápido por Severidad -->
-    <div class="flex items-center gap-2 flex-wrap text-xs">
-      <span class="text-slate-400 font-semibold uppercase tracking-wider">Filtrar por Severidad:</span>
+    <!-- Filtros de Severidad en una Sola Fila -->
+    <div class="flex items-center gap-1.5 text-xs">
+      <span class="text-[11px] text-slate-400 uppercase font-semibold mr-1">Filtrar:</span>
       <button 
         @click="filterSeverity = ''" 
-        :class="filterSeverity === '' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50' : 'bg-slate-900 text-slate-400 border-slate-800'"
-        class="py-1 px-3 rounded-full border transition-colors"
+        :class="filterSeverity === '' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
+        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
       >
         Todas ({{ alerts.length }})
       </button>
       <button 
         @click="filterSeverity = 'Critical'" 
-        :class="filterSeverity === 'Critical' ? 'bg-rose-500/30 text-rose-300 border-rose-500/60' : 'bg-slate-900 text-slate-400 border-slate-800'"
-        class="py-1 px-3 rounded-full border transition-colors"
+        :class="filterSeverity === 'Critical' ? 'bg-rose-500/30 text-rose-300 border-rose-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
+        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
       >
-        Critical (Críticas)
+        Critical
       </button>
       <button 
         @click="filterSeverity = 'High'" 
-        :class="filterSeverity === 'High' ? 'bg-orange-500/30 text-orange-300 border-orange-500/60' : 'bg-slate-900 text-slate-400 border-slate-800'"
-        class="py-1 px-3 rounded-full border transition-colors"
+        :class="filterSeverity === 'High' ? 'bg-orange-500/30 text-orange-300 border-orange-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
+        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
       >
-        High (Altas)
+        High
       </button>
       <button 
         @click="filterSeverity = 'Medium'" 
-        :class="filterSeverity === 'Medium' ? 'bg-amber-500/30 text-amber-300 border-amber-500/60' : 'bg-slate-900 text-slate-400 border-slate-800'"
-        class="py-1 px-3 rounded-full border transition-colors"
+        :class="filterSeverity === 'Medium' ? 'bg-amber-500/30 text-amber-300 border-amber-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
+        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
       >
         Medium
       </button>
-      <button 
-        @click="filterSeverity = 'Low'" 
-        :class="filterSeverity === 'Low' ? 'bg-teal-500/30 text-teal-300 border-teal-500/60' : 'bg-slate-900 text-slate-400 border-slate-800'"
-        class="py-1 px-3 rounded-full border transition-colors"
-      >
-        Low
-      </button>
     </div>
 
-    <!-- Listado de Tarjetas de Alertas -->
-    <div class="grid grid-cols-1 gap-3">
-      <div v-if="filteredAlerts.length === 0" class="cyber-card p-8 text-center text-slate-400 text-sm">
+    <!-- Lista Compacta de Alertas -->
+    <div class="space-y-1.5">
+      <div v-if="filteredAlerts.length === 0" class="cyber-card p-6 text-center text-slate-400 text-xs">
         No hay alertas que coincidan con el filtro seleccionado.
       </div>
 
       <div 
         v-for="al in filteredAlerts" 
         :key="al.id"
-        class="cyber-card p-4 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        :class="{ 'border-rose-500/40 bg-rose-950/10': al.gravedad === 'Critical' && !al.leida, 'opacity-70': al.leida }"
+        class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between gap-3 transition-colors"
+        :class="{ 'border-rose-500/40 bg-rose-950/15': al.gravedad === 'Critical' && !al.leida, 'opacity-70': al.leida }"
       >
-        <div class="flex items-start gap-3">
-          <!-- Icono de Estado -->
-          <div 
-            class="p-2.5 rounded-xl shrink-0 mt-0.5"
-            :class="al.gravedad === 'Critical' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
-          </div>
+        <div class="flex items-center gap-2.5 truncate">
+          <span :class="['severity-badge text-[9px] shrink-0', `severity-${al.gravedad.toLowerCase()}`]">
+            {{ al.gravedad }}
+          </span>
 
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span :class="['severity-badge text-xs', `severity-${al.gravedad.toLowerCase()}`]">
-                {{ al.gravedad }}
-              </span>
-              <span v-if="al.incidente_folio" class="text-xs font-mono text-cyan-400 font-bold">
-                {{ al.incidente_folio }}
-              </span>
-              <span class="text-xs text-slate-400 font-mono">
-                {{ al.fecha_emision }}
-              </span>
-              <span v-if="!al.leida" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
-                NUEVA ALERTA
-              </span>
-            </div>
+          <span v-if="!al.leida" class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shrink-0">
+            NUEVA
+          </span>
 
-            <h3 class="text-base font-bold text-white mt-1">{{ al.titulo }}</h3>
-            <p class="text-sm text-slate-300 mt-0.5 leading-relaxed">{{ al.mensaje }}</p>
-          </div>
+          <span class="text-xs font-bold text-white truncate">{{ al.titulo }}</span>
+          <span class="text-xs text-slate-300 hidden md:inline truncate">&bull; {{ al.mensaje }}</span>
         </div>
 
-        <!-- Acciones de Alerta -->
-        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-          <router-link 
-            v-if="al.incidente_id" 
-            to="/incidents"
-            class="btn-cyber-secondary py-1 px-3 text-xs"
-          >
-            Ver Ticket
-          </router-link>
-
+        <div class="flex items-center gap-2 shrink-0 text-xs">
+          <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">{{ al.fecha_emision }}</span>
           <button 
             v-if="!al.leida" 
             @click="markRead(al.id)" 
-            class="btn-cyber-primary py-1 px-3 text-xs"
+            class="btn-cyber-primary py-0.5 px-2 text-[10px]"
           >
-            Marcar Leída
+            Leída
           </button>
-          <span v-else class="text-xs text-slate-500 flex items-center gap-1 font-mono">
-            &check; Leída
-          </span>
+          <span v-else class="text-[10px] text-slate-500 font-mono">&check;</span>
         </div>
       </div>
     </div>
 
-    <!-- Reglas de Alertas Vigentes -->
-    <div class="cyber-card p-5 mt-8">
-      <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
-        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Reglas de Alertas Vigentes (Tabla Compacta) -->
+    <div class="cyber-card p-3.5 bg-[#0d172e] mt-4">
+      <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
-        Reglas Automáticas de Disparo de Alertas
+        Reglas Automáticas de Notificación
       </h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-950/60 uppercase text-slate-400 border-b border-slate-800">
-            <tr>
-              <th class="p-2.5">ID</th>
-              <th class="p-2.5">Nombre de la Regla</th>
-              <th class="p-2.5">Criterio de Gravedad</th>
-              <th class="p-2.5">Notificación Activa</th>
-              <th class="p-2.5">Creado Por</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800">
-            <tr v-for="r in rules" :key="r.id">
-              <td class="p-2.5 font-mono text-cyan-400">{{ r.id }}</td>
-              <td class="p-2.5 font-semibold text-white">{{ r.nombre }}</td>
-              <td class="p-2.5">
-                <span :class="['severity-badge text-[10px]', `severity-${r.criterio_gravedad.toLowerCase()}`]">
-                  {{ r.criterio_gravedad }}
-                </span>
-              </td>
-              <td class="p-2.5 text-emerald-400 font-semibold">&check; Activa</td>
-              <td class="p-2.5 text-slate-400">{{ r.creador_nombre || 'Administrador' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="w-full text-left text-[11px] text-slate-300">
+        <thead class="bg-[#080f1e] text-[10px] uppercase text-slate-400 border-b border-sky-950">
+          <tr>
+            <th class="py-1 px-2.5">ID</th>
+            <th class="py-1 px-2.5">Nombre Regla</th>
+            <th class="py-1 px-2.5">Criterio Mínimo</th>
+            <th class="py-1 px-2.5">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-sky-950/60 bg-[#091224]">
+          <tr v-for="r in rules" :key="r.id">
+            <td class="py-1 px-2.5 font-mono text-cyan-400">{{ r.id }}</td>
+            <td class="py-1 px-2.5 font-semibold text-white">{{ r.nombre }}</td>
+            <td class="py-1 px-2.5">
+              <span :class="['severity-badge text-[9px]', `severity-${r.criterio_gravedad.toLowerCase()}`]">
+                {{ r.criterio_gravedad }}
+              </span>
+            </td>
+            <td class="py-1 px-2.5 text-emerald-400 font-semibold">&check; Activa</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- MODAL Crear Regla -->
     <div v-if="showRuleModal" class="modal-overlay" @click.self="showRuleModal = false">
-      <div class="modal-content max-w-md">
-        <div class="flex items-center justify-between p-4 border-b border-cyan-500/20 bg-slate-900/60 rounded-t-xl">
-          <h3 class="text-base font-bold text-cyan-400">Nueva Regla de Disparo de Alerta</h3>
+      <div class="modal-content max-w-sm p-0">
+        <div class="flex items-center justify-between p-3 border-b border-sky-950/80 bg-[#080f1e] rounded-t-lg">
+          <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Nueva Regla de Alerta</h3>
           <button @click="showRuleModal = false" class="text-slate-400 hover:text-white">&times;</button>
         </div>
-        <form @submit.prevent="submitRule" class="p-5 space-y-4 text-xs">
+        <form @submit.prevent="submitRule" class="p-4 space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-300 uppercase mb-1">Nombre Descriptivo de la Regla:</label>
-            <input type="text" v-model="newRule.nombre" placeholder="Ej. Detección de Intentos DDoS" required class="cyber-input text-sm"/>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Nombre de la Regla:</label>
+            <input type="text" v-model="newRule.nombre" placeholder="Ej. Detección Ransomware" required class="cyber-input text-xs py-1"/>
           </div>
           <div>
-            <label class="block font-semibold text-slate-300 uppercase mb-1">Criterio Mínimo de Gravedad:</label>
-            <select v-model="newRule.criterio_gravedad" class="cyber-select text-sm">
-              <option value="Critical">Critical (Solo Críticos)</option>
-              <option value="High">High (Altos y Críticos)</option>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Gravedad Mínima:</label>
+            <select v-model="newRule.criterio_gravedad" class="cyber-select text-xs py-1">
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
               <option value="Medium">Medium</option>
             </select>
           </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
-            <button type="button" @click="showRuleModal = false" class="btn-cyber-secondary">Cancelar</button>
-            <button type="submit" class="btn-cyber-primary">Guardar Regla</button>
+          <div class="flex justify-end gap-2 pt-2 border-t border-sky-950/80">
+            <button type="button" @click="showRuleModal = false" class="btn-cyber-secondary text-xs">Cancelar</button>
+            <button type="submit" class="btn-cyber-primary text-xs">Guardar</button>
           </div>
         </form>
       </div>
@@ -212,16 +169,12 @@ import { useAuth } from '../composables/useAuth';
 import { alertsApi } from '../services/alertsApi';
 
 const { hasRole } = useAuth();
-
 const alerts = ref([]);
 const rules = ref([]);
 const filterSeverity = ref('');
 const showRuleModal = ref(false);
 
-const newRule = ref({
-  nombre: '',
-  criterio_gravedad: 'High'
-});
+const newRule = ref({ nombre: '', criterio_gravedad: 'High' });
 
 const filteredAlerts = computed(() => {
   if (!filterSeverity.value) return alerts.value;
@@ -234,12 +187,8 @@ async function loadAlerts() {
       alertsApi.getAlerts(),
       alertsApi.getRules()
     ]);
-    if (alRes?.ok) {
-      alerts.value = alRes.data.alertas || [];
-    }
-    if (ruleRes?.ok) {
-      rules.value = ruleRes.data || [];
-    }
+    if (alRes?.ok) alerts.value = alRes.data.alertas || [];
+    if (ruleRes?.ok) rules.value = ruleRes.data || [];
   } catch (err) {
     console.error('Error cargando alertas:', err);
   }

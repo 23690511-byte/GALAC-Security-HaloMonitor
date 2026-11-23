@@ -1,11 +1,11 @@
 <template>
-  <div class="datagrid-container space-y-4">
-    <!-- Barra Superior: Búsqueda en tiempo real y Exportaciones -->
-    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-      <!-- Búsqueda en Tiempo Real -->
-      <div class="relative flex-1 max-w-md">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="datagrid-container space-y-2.5">
+    <!-- Barra Superior Compacta: Búsqueda y Exportaciones en una sola línea -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+      <!-- Caja de Búsqueda Compacta -->
+      <div class="relative flex-1 max-w-sm">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </span>
@@ -13,23 +13,22 @@
           type="text" 
           v-model="searchQuery" 
           :placeholder="searchPlaceholder" 
-          class="cyber-input pl-9 text-sm"
+          class="cyber-input pl-8 text-xs py-1"
         />
         <button 
           v-if="searchQuery" 
           @click="searchQuery = ''" 
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+          class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-white text-xs"
         >
           &times;
         </button>
       </div>
 
-      <!-- Acciones de Exportación y Filtros Rápidos -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <!-- Selector de Tamaño de Página -->
-        <div class="flex items-center gap-1.5 text-xs text-slate-400">
-          <span>Mostrar:</span>
-          <select v-model.number="pageSize" class="cyber-select text-xs py-1 px-2 w-auto">
+      <!-- Controles de Exportación y Registros -->
+      <div class="flex items-center gap-1.5 flex-wrap justify-end">
+        <div class="flex items-center gap-1 text-[11px] text-slate-400">
+          <span>Ver:</span>
+          <select v-model.number="pageSize" class="cyber-select text-[11px] py-0.5 px-1.5 w-auto">
             <option :value="5">5</option>
             <option :value="10">10</option>
             <option :value="25">25</option>
@@ -41,83 +40,77 @@
         <button 
           type="button" 
           @click="exportToExcel" 
-          class="btn-cyber-secondary text-xs py-1.5 px-3"
-          title="Descargar datos filtrados en formato Excel / CSV"
+          class="btn-cyber-secondary text-[11px] py-1 px-2.5"
+          title="Descargar datos filtrados en Excel (CSV UTF-8)"
         >
-          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
             <path d="M8 12l2.5 3.5L8 19h1.8l1.6-2.5 1.6 2.5h1.8L12.3 15.5 14.8 12H13l-1.6 2.5L9.8 12z"/>
           </svg>
-          Exportar Excel
+          Excel
         </button>
 
         <!-- Botón Exportar a PDF -->
         <button 
           type="button" 
           @click="exportToPdf" 
-          class="btn-cyber-secondary text-xs py-1.5 px-3"
-          title="Generar e imprimir reporte PDF"
+          class="btn-cyber-secondary text-[11px] py-1 px-2.5"
+          title="Generar reporte PDF"
         >
-          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
           </svg>
-          Exportar PDF
+          PDF
         </button>
 
-        <!-- Slot Extra para Botones de Acción Global (ej. 'Crear') -->
+        <!-- Slot para Acciones Globales (ej. botón Crear) -->
         <slot name="header-actions"></slot>
       </div>
     </div>
 
-    <!-- Tabla Responsiva -->
-    <div class="overflow-x-auto rounded-xl border border-cyan-500/20 bg-slate-900/40">
-      <table class="w-full text-left text-sm text-slate-200 divide-y divide-slate-800">
-        <thead class="bg-slate-950/80 text-xs uppercase tracking-wider text-cyan-400 font-semibold">
+    <!-- Tabla Ultracompacta Responsiva -->
+    <div class="overflow-x-auto rounded border border-sky-950/80 bg-[#080f1e]">
+      <table class="w-full text-left text-xs text-slate-200 divide-y divide-sky-950/80">
+        <thead class="bg-[#0b1428] text-[10px] uppercase tracking-wider text-cyan-400 font-semibold select-none">
           <tr>
             <th 
               v-for="col in columns" 
               :key="col.key" 
-              class="px-4 py-3.5 select-none"
+              class="py-2 px-3"
               :class="col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left'"
             >
               {{ col.label }}
             </th>
-            <th v-if="$slots.actions" class="px-4 py-3.5 text-right">
+            <th v-if="$slots.actions" class="py-2 px-3 text-right">
               Acciones
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-800/60 font-normal">
+        <tbody class="divide-y divide-sky-950/60 bg-[#091224] text-[11px]">
           <tr v-if="paginatedData.length === 0">
-            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="text-center py-8 text-slate-400 text-sm">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>No se encontraron registros que coincidan con la búsqueda.</span>
-              </div>
+            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="text-center py-6 text-slate-400">
+              No se encontraron registros que coincidan con la búsqueda.
             </td>
           </tr>
 
           <tr 
             v-for="(row, rowIdx) in paginatedData" 
             :key="row.id || rowIdx"
-            class="hover:bg-slate-800/40 transition-colors"
+            class="hover:bg-[#0f1d38] transition-colors"
           >
             <td 
               v-for="col in columns" 
               :key="col.key"
-              class="px-4 py-3 whitespace-nowrap"
+              class="py-1.5 px-3 whitespace-nowrap"
               :class="col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left'"
             >
-              <!-- Slot dinámico por columna: #cell-${column.key} -->
+              <!-- Slot Dinámico por Columna: #cell-${col.key} -->
               <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
                 {{ formatCellValue(row[col.key], col) }}
               </slot>
             </td>
 
-            <!-- Slot para Acciones por Registro -->
-            <td v-if="$slots.actions" class="px-4 py-3 text-right whitespace-nowrap">
+            <td v-if="$slots.actions" class="py-1.5 px-3 text-right whitespace-nowrap">
               <slot name="actions" :row="row"></slot>
             </td>
           </tr>
@@ -125,23 +118,23 @@
       </table>
     </div>
 
-    <!-- Barra Inferior: Contador de Registros y Paginación -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 pt-2">
+    <!-- Barra Inferior Compacta: Contador y Paginador -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400 pt-1">
       <div>
         Mostrando <span class="text-cyan-400 font-semibold">{{ startIndex + 1 }}</span> a 
         <span class="text-cyan-400 font-semibold">{{ endIndex }}</span> de 
         <span class="text-white font-semibold">{{ filteredData.length }}</span> registros
         <span v-if="filteredData.length !== data.length" class="text-slate-500">
-          (filtrados de {{ data.length }} totales)
+          (filtrados de {{ data.length }})
         </span>
       </div>
 
       <!-- Controles de Paginación -->
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1">
         <button 
           @click="currentPage = 1" 
           :disabled="currentPage === 1"
-          class="btn-cyber-secondary py-1 px-2 text-xs"
+          class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
           title="Primera página"
         >
           &laquo;
@@ -149,29 +142,29 @@
         <button 
           @click="currentPage--" 
           :disabled="currentPage === 1"
-          class="btn-cyber-secondary py-1 px-2 text-xs"
-          title="Página anterior"
+          class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
+          title="Anterior"
         >
-          &lsaquo; Anterior
+          &lsaquo;
         </button>
 
-        <span class="px-3 py-1 bg-slate-900 border border-slate-700 rounded text-cyan-300 font-mono">
+        <span class="px-2 py-0.5 bg-[#080f1e] border border-sky-950 rounded text-cyan-300 font-mono text-[10px]">
           {{ currentPage }} / {{ totalPages || 1 }}
         </span>
 
         <button 
           @click="currentPage++" 
           :disabled="currentPage >= totalPages"
-          class="btn-cyber-secondary py-1 px-2 text-xs"
-          title="Página siguiente"
+          class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
+          title="Siguiente"
         >
-          Siguiente &rsaquo;
+          &rsaquo;
         </button>
         <button 
           @click="currentPage = totalPages" 
           :disabled="currentPage >= totalPages"
-          class="btn-cyber-secondary py-1 px-2 text-xs"
-          title="Última página"
+          class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
+          title="Última"
         >
           &raquo;
         </button>
@@ -192,11 +185,11 @@ const props = defineProps({
   columns: {
     type: Array,
     required: true,
-    default: () => [] // [{ key: 'id', label: 'ID', align: 'left', format: fn }]
+    default: () => []
   },
   searchPlaceholder: {
     type: String,
-    default: 'Buscar por cualquier campo...'
+    default: 'Buscar registros...'
   },
   defaultPageSize: {
     type: Number,
@@ -212,12 +205,10 @@ const searchQuery = ref('');
 const currentPage = ref(1);
 const pageSize = ref(props.defaultPageSize);
 
-// Reset de página al cambiar búsqueda
 watch([searchQuery, pageSize], () => {
   currentPage.value = 1;
 });
 
-// Filtrado Reactivo en Tiempo Real
 const filteredData = computed(() => {
   if (!searchQuery.value.trim()) {
     return props.data;
@@ -232,7 +223,6 @@ const filteredData = computed(() => {
   });
 });
 
-// Paginación
 const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize.value));
 
 const startIndex = computed(() => {
@@ -256,7 +246,6 @@ function formatCellValue(val, col) {
   return val;
 }
 
-// Exportación a Excel (CSV con formato compatible de Excel y UTF-8 BOM)
 function exportToExcel() {
   const dataset = filteredData.value;
   if (!dataset.length) {
@@ -264,10 +253,7 @@ function exportToExcel() {
     return;
   }
 
-  // Encabezados
   const headers = props.columns.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
-
-  // Filas
   const rows = dataset.map(row => {
     return props.columns.map(c => {
       let v = row[c.key];
@@ -289,7 +275,6 @@ function exportToExcel() {
   URL.revokeObjectURL(url);
 }
 
-// Exportación a PDF (Ventana imprimible formateada profesionalmente)
 function exportToPdf() {
   const dataset = filteredData.value;
   if (!dataset.length) {
@@ -303,14 +288,14 @@ function exportToPdf() {
     return;
   }
 
-  const tableHeaders = props.columns.map(c => `<th style="border: 1px solid #ddd; padding: 8px; background: #0c1527; color: #00f2fe; text-align: left;">${c.label}</th>`).join('');
+  const tableHeaders = props.columns.map(c => `<th style="border: 1px solid #ddd; padding: 6px; background: #0c1527; color: #00f2fe; text-align: left; font-size: 11px;">${c.label}</th>`).join('');
 
   const tableRows = dataset.map(row => {
     const cells = props.columns.map(c => {
       let v = row[c.key];
       if (v === null || v === undefined) v = '-';
       if (typeof v === 'object') v = JSON.stringify(v);
-      return `<td style="border: 1px solid #ddd; padding: 8px;">${String(v)}</td>`;
+      return `<td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${String(v)}</td>`;
     }).join('');
     return `<tr>${cells}</tr>`;
   }).join('');
@@ -321,34 +306,28 @@ function exportToPdf() {
       <head>
         <title>${props.exportTitle} - HaloMonitor</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 30px; color: #111; }
-          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00f2fe; padding-bottom: 12px; margin-bottom: 20px; }
-          .title { font-size: 20px; font-weight: bold; color: #0c1527; }
-          .meta { font-size: 12px; color: #666; }
-          table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 15px; }
-          @media print {
-            button { display: none; }
-          }
+          body { font-family: Arial, sans-serif; margin: 20px; color: #111; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-bottom: 12px; }
+          .title { font-size: 18px; font-weight: bold; color: #0c1527; }
+          table { width: 100%; border-collapse: collapse; }
         </style>
       </head>
       <body>
         <div class="header">
           <div>
             <div class="title">HaloMonitor | GALAC Security</div>
-            <div style="font-size: 13px; color: #333;">${props.exportTitle}</div>
+            <div style="font-size: 12px; color: #444;">${props.exportTitle}</div>
           </div>
-          <div class="meta">
-            <div>Fecha de emisión: ${new Date().toLocaleString()}</div>
-            <div>Registros incluidos: ${dataset.length}</div>
+          <div style="font-size: 11px; color: #666;">
+            <div>Fecha: ${new Date().toLocaleString()}</div>
+            <div>Registros: ${dataset.length}</div>
           </div>
         </div>
         <table>
           <thead><tr>${tableHeaders}</tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
-        <script>
-          window.onload = function() { window.print(); }
-        <\/script>
+        <script>window.onload = function() { window.print(); }<\/script>
       </body>
     </html>
   `);

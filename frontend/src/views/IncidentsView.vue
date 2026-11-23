@@ -1,87 +1,77 @@
 <template>
-  <div class="space-y-6">
-    <!-- Encabezado de Página -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+  <div class="space-y-3 max-w-full">
+    <!-- Barra Superior de Acciones: Título + Botón de Nuevo Incidente -->
+    <div class="flex items-center justify-between gap-2 pb-1 border-b border-sky-950/80">
       <div>
-        <h1 class="text-2xl font-black text-white flex items-center gap-2">
-          <span class="w-2.5 h-6 bg-cyan-400 rounded-sm inline-block"></span>
+        <h1 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-1.5 h-3.5 bg-cyan-400 rounded-sm inline-block"></span>
           Gestión Integral de Incidentes
         </h1>
-        <p class="text-xs text-slate-400 mt-1 font-mono">
-          Ciclo de Vida: Registro, Trazabilidad Inmutable, Transiciones ACID & Bloqueo Concurrente
-        </p>
+        <span class="text-[10px] text-slate-400 font-mono">Control de Concurrencia (SELECT ... FOR UPDATE) & Transiciones ACID</span>
       </div>
 
-      <!-- Botón de Nuevo Incidente (Solo Administrador y Analista) -->
       <div v-if="hasRole(['Administrador', 'Analista'])">
-        <button @click="openCreateModal" class="btn-cyber-primary text-xs py-2 px-4 shadow-[0_0_15px_rgba(0,242,254,0.3)]">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button @click="openCreateModal" class="btn-cyber-primary text-xs py-1 px-3">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
-          Registrar Nuevo Incidente
+          Nuevo Incidente
         </button>
       </div>
     </div>
 
-    <!-- Mensajes de Notificación Global -->
-    <div v-if="bannerMessage" :class="bannerType === 'error' ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'" class="p-3 rounded-lg border text-xs flex items-center justify-between">
-      <div class="flex items-center gap-2">
+    <!-- Banner de Feedback Compacto -->
+    <div v-if="bannerMessage" :class="bannerType === 'error' ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'" class="p-2 rounded border text-xs flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
         <span class="font-bold">{{ bannerType === 'error' ? 'Error:' : 'Éxito:' }}</span>
         <span>{{ bannerMessage }}</span>
       </div>
       <button @click="bannerMessage = ''" class="hover:text-white">&times;</button>
     </div>
 
-    <!-- Tabla Inteligente DataGrid (Requisito 4) -->
-    <div class="cyber-card p-5">
+    <!-- DataGrid de Incidentes -->
+    <div class="cyber-card p-3.5 bg-[#0d172e]">
       <DataGrid
         :data="incidents"
         :columns="columns"
-        search-placeholder="Buscar incidente por folio, título, categoría o sistema..."
+        search-placeholder="Buscar incidente por folio, título o activo..."
         export-title="Incidentes_HaloMonitor"
       >
-        <!-- Slot Dinámico por Columna: Gravedad -->
         <template #cell-gravedad="{ value }">
-          <span :class="['severity-badge text-xs', `severity-${(value || '').toLowerCase()}`]">
+          <span :class="['severity-badge text-[10px]', `severity-${(value || '').toLowerCase()}`]">
             {{ value }}
           </span>
         </template>
 
-        <!-- Slot Dinámico por Columna: Estado -->
         <template #cell-estado="{ value }">
           <RequestStatusBadge :status="value" />
         </template>
 
-        <!-- Slot Dinámico por Columna: Folio -->
         <template #cell-folio="{ value }">
-          <span class="font-mono text-cyan-400 font-semibold">{{ value }}</span>
+          <span class="font-mono text-cyan-400 font-bold">{{ value }}</span>
         </template>
 
-        <!-- Slot Dinámico por Columna: Costo Congelado -->
         <template #cell-precio_contratado="{ value }">
           <span class="font-mono text-slate-300">
             ${{ Number(value || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}
           </span>
         </template>
 
-        <!-- Slot para Acciones por Registro -->
         <template #actions="{ row }">
-          <div class="flex items-center justify-end gap-1.5">
-            <!-- Botón Ver Detalle & Línea de Tiempo -->
+          <div class="flex items-center justify-end gap-1">
             <button 
               @click="viewDetail(row)"
-              class="btn-cyber-secondary py-1 px-2.5 text-xs text-cyan-300 hover:text-white"
-              title="Ver bitácora de auditoría y línea de tiempo"
+              class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
+              title="Ver bitácora de auditoría"
             >
               Historial
             </button>
 
-            <!-- Botón Gestionar Estado (Solo Administrador y Analista) -->
             <button 
               v-if="hasRole(['Administrador', 'Analista'])"
               @click="openActionModal(row)"
-              class="btn-cyber-primary py-1 px-2.5 text-xs"
-              title="Cambiar estado o reasignar operador"
+              class="btn-cyber-primary py-0.5 px-2 text-[10px]"
+              title="Cambiar estado o reasignar"
             >
               Gestionar
             </button>
@@ -90,12 +80,12 @@
       </DataGrid>
     </div>
 
-    <!-- MODAL 1: Registrar Nuevo Incidente -->
+    <!-- MODAL 1: Registrar Nuevo Incidente (Compacto y Optimizado) -->
     <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-      <div class="modal-content max-w-xl">
-        <div class="flex items-center justify-between p-4 border-b border-cyan-500/20 bg-slate-900/60 rounded-t-xl">
-          <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="modal-content max-w-lg p-0">
+        <div class="flex items-center justify-between p-3 border-b border-sky-950/80 bg-[#080f1e] rounded-t-lg">
+          <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
             Apertura de Incidente de Seguridad
@@ -103,33 +93,33 @@
           <button @click="showCreateModal = false" class="text-slate-400 hover:text-white">&times;</button>
         </div>
 
-        <form @submit.prevent="submitCreateIncident" class="p-5 space-y-4 text-xs">
+        <form @submit.prevent="submitCreateIncident" class="p-4 space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-300 uppercase mb-1">Título del Incidente:</label>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Título del Incidente:</label>
             <input 
               type="text" 
               v-model="createForm.titulo" 
-              placeholder="Ej. Malware Detectado en Servidor Web PyME" 
+              placeholder="Ej. Malware Detectado en Endpoint" 
               required
-              class="cyber-input text-sm"
+              class="cyber-input text-xs py-1"
             />
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block font-semibold text-slate-300 uppercase mb-1">Categoría:</label>
-              <select v-model="createForm.categoria" class="cyber-select text-sm">
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Categoría:</label>
+              <select v-model="createForm.categoria" class="cyber-select text-xs py-1">
                 <option value="Malware">Malware / Ransomware</option>
-                <option value="Intrusión">Intento de Intrusión (Brute Force)</option>
-                <option value="Escaneo">Escaneo no Autorizado</option>
-                <option value="Fuga de Datos">Fuga / Exfiltración de Datos</option>
-                <option value="Disponibilidad">Falla de Disponibilidad</option>
+                <option value="Intrusión">Intento de Intrusión</option>
+                <option value="Escaneo">Escaneo de Puertos</option>
+                <option value="Fuga de Datos">Fuga de Datos</option>
+                <option value="Disponibilidad">Disponibilidad</option>
               </select>
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-300 uppercase mb-1">Severidad / Impacto:</label>
-              <select v-model="createForm.gravedad" class="cyber-select text-sm">
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Severidad:</label>
+              <select v-model="createForm.gravedad" class="cyber-select text-xs py-1">
                 <option value="Low">Low (Bajo)</option>
                 <option value="Medium">Medium (Medio)</option>
                 <option value="High">High (Alto)</option>
@@ -138,149 +128,133 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block font-semibold text-slate-300 uppercase mb-1">Activo / Sistema Afectado:</label>
-              <select v-model="createForm.sistema_id" class="cyber-select text-sm">
-                <option :value="null">-- Seleccione Sistema --</option>
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Activo PyME:</label>
+              <select v-model="createForm.sistema_id" class="cyber-select text-xs py-1">
+                <option :value="null">-- Seleccione --</option>
                 <option v-for="s in catalogs.sistemas" :key="s.id" :value="s.id">
-                  {{ s.nombre }} ({{ s.ip_host }})
+                  {{ s.nombre }}
                 </option>
               </select>
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-300 uppercase mb-1">Asignar Operador / Analista:</label>
-              <select v-model="createForm.usuario_asignado_id" class="cyber-select text-sm">
-                <option :value="null">-- Asignación Automática --</option>
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Asignar Analista:</label>
+              <select v-model="createForm.usuario_asignado_id" class="cyber-select text-xs py-1">
+                <option :value="null">-- Automático --</option>
                 <option v-for="u in catalogs.usuarios" :key="u.id" :value="u.id">
-                  {{ u.nombre }} ({{ u.rol }})
+                  {{ u.nombre }}
                 </option>
               </select>
             </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-cyan-400 uppercase mb-1">
-              Fecha y Hora Límite de Atención Futura (SLA):
-            </label>
+            <label class="block font-semibold text-cyan-400 uppercase mb-0.5 text-[11px]">Fecha Límite SLA (Futura):</label>
             <input 
               type="datetime-local" 
               v-model="createForm.fecha_limite_atencion" 
               :min="minFutureDate"
-              class="cyber-input font-mono text-sm"
+              class="cyber-input text-xs py-1 font-mono"
             />
-            <span class="text-[10px] text-slate-500">Debe ser una fecha futura para cálculo de SLA</span>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-300 uppercase mb-1">Descripción Técnica Detallada:</label>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Descripción del Evento:</label>
             <textarea 
               v-model="createForm.descripcion" 
-              rows="3" 
-              placeholder="Describa el vector de ataque detectado, evidencias o bitácoras asociadas..." 
+              rows="2" 
+              placeholder="Detalle el vector de ataque detectado..." 
               required
-              class="cyber-textarea text-sm"
+              class="cyber-textarea text-xs py-1"
             ></textarea>
           </div>
 
-          <div class="p-3 bg-cyan-950/30 border border-cyan-800/40 rounded-lg text-slate-400 space-y-1 text-[11px]">
-            <span class="text-cyan-400 font-bold block">&bull; Garantía de Trazabilidad e Inmutabilidad:</span>
-            <p>Se congelarán los parámetros operativos y costos de SLA al momento del registro. Se disparará alerta automática ante severidades High/Critical.</p>
+          <div class="p-2 bg-cyan-950/30 border border-cyan-800/40 rounded text-[10px] text-slate-400">
+            &bull; Transacción ACID: Se congelará el snapshot de integridad y se creará alerta inmediata si la severidad es High o Critical.
           </div>
 
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-            <button type="button" @click="showCreateModal = false" class="btn-cyber-secondary">
-              Cancelar
-            </button>
-            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary">
-              <span v-if="isSubmitting" class="animate-spin">&#9696;</span>
-              Guardar con Transacción ACID
+          <div class="flex items-center justify-end gap-2 pt-2 border-t border-sky-950/80">
+            <button type="button" @click="showCreateModal = false" class="btn-cyber-secondary text-xs">Cancelar</button>
+            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary text-xs">
+              <span v-if="isSubmitting" class="animate-spin mr-1">&#9696;</span>
+              Guardar Ticket
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- MODAL 2: Detalle e Historial de Auditoría con Timeline -->
+    <!-- MODAL 2: Detalle e Historial de Auditoría (Compacto) -->
     <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
-      <div class="modal-content max-w-2xl">
-        <div class="flex items-center justify-between p-4 border-b border-cyan-500/20 bg-slate-900/60 rounded-t-xl">
+      <div class="modal-content max-w-xl p-0">
+        <div class="flex items-center justify-between p-3 border-b border-sky-950/80 bg-[#080f1e] rounded-t-lg">
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
               <span class="font-mono text-cyan-400">{{ selectedIncident?.folio }}</span>
               <span>- {{ selectedIncident?.titulo }}</span>
             </h3>
-            <span class="text-xs text-slate-400 font-mono">
-              Registrado por: {{ selectedIncident?.reporta_nombre }} &bull; {{ selectedIncident?.fecha_registro }}
+            <span class="text-[10px] text-slate-400 font-mono">
+              Reportado por: {{ selectedIncident?.reporta_nombre }} &bull; {{ selectedIncident?.fecha_registro }}
             </span>
           </div>
           <button @click="showDetailModal = false" class="text-slate-400 hover:text-white">&times;</button>
         </div>
 
-        <div class="p-5 space-y-5">
-          <!-- Metadatos Clave -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800 text-xs">
+        <div class="p-4 space-y-3 text-xs max-h-[70vh] overflow-y-auto">
+          <!-- Metadatos Clave en Barra Compacta -->
+          <div class="grid grid-cols-4 gap-2 p-2 bg-[#080f1e] rounded border border-sky-950 text-[11px]">
             <div>
-              <span class="text-slate-400 block">Severidad:</span>
-              <span :class="['severity-badge mt-1', `severity-${(selectedIncident?.gravedad || '').toLowerCase()}`]">
+              <span class="text-slate-500 block text-[10px]">Gravedad:</span>
+              <span :class="['severity-badge text-[9px] mt-0.5', `severity-${(selectedIncident?.gravedad || '').toLowerCase()}`]">
                 {{ selectedIncident?.gravedad }}
               </span>
             </div>
             <div>
-              <span class="text-slate-400 block">Estado:</span>
-              <div class="mt-1">
+              <span class="text-slate-500 block text-[10px]">Estado:</span>
+              <div class="mt-0.5">
                 <RequestStatusBadge :status="selectedIncident?.estado || ''" />
               </div>
             </div>
             <div>
-              <span class="text-slate-400 block">Sistema Afectado:</span>
-              <span class="text-white font-medium block mt-1">
-                {{ selectedIncident?.sistema_nombre || 'No especificado' }}
-              </span>
+              <span class="text-slate-500 block text-[10px]">Activo:</span>
+              <span class="text-white truncate block mt-0.5 font-medium">{{ selectedIncident?.sistema_nombre || 'N/A' }}</span>
             </div>
             <div>
-              <span class="text-slate-400 block">Operador Asignado:</span>
-              <span class="text-cyan-300 font-medium block mt-1">
-                {{ selectedIncident?.asignado_nombre || 'Sin asignar' }}
-              </span>
+              <span class="text-slate-500 block text-[10px]">Asignado:</span>
+              <span class="text-cyan-300 truncate block mt-0.5 font-medium">{{ selectedIncident?.asignado_nombre || 'Sin asignar' }}</span>
             </div>
           </div>
 
-          <!-- Descripción -->
           <div>
-            <h4 class="text-xs uppercase font-semibold text-slate-400 mb-1">Descripción del Evento:</h4>
-            <p class="text-sm text-slate-200 bg-slate-900/70 p-3 rounded-lg border border-slate-800 leading-relaxed">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Descripción Técnica:</span>
+            <p class="text-xs text-slate-300 bg-[#080f1e] p-2 rounded border border-sky-950/80 leading-relaxed">
               {{ selectedIncident?.descripcion }}
             </p>
           </div>
 
-          <!-- Línea de Tiempo de Auditoría (Componente Timeline.vue) -->
+          <!-- Línea de Tiempo de Auditoría (historial_solicitud) -->
           <div>
-            <h4 class="text-xs uppercase font-bold text-cyan-400 mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Línea de Tiempo y Auditoría Inmutable (historial_solicitud):
-            </h4>
+            <span class="text-[10px] uppercase font-bold text-cyan-400 block mb-2">
+              Línea de Tiempo y Trazabilidad Inmutable:
+            </span>
             <Timeline :items="incidentHistory" />
           </div>
         </div>
 
-        <div class="flex justify-end p-4 border-t border-slate-800 bg-slate-900/40 rounded-b-xl">
-          <button @click="showDetailModal = false" class="btn-cyber-secondary text-xs">
-            Cerrar Ventana
-          </button>
+        <div class="flex justify-end p-2.5 border-t border-sky-950 bg-[#080f1e] rounded-b-lg">
+          <button @click="showDetailModal = false" class="btn-cyber-secondary text-xs py-0.5 px-3">Cerrar</button>
         </div>
       </div>
     </div>
 
-    <!-- MODAL 3: Cambiar Estado / Acción Configurable (RequestActionModal.vue) -->
+    <!-- MODAL 3: Cambiar Estado / Acción Configurable -->
     <RequestActionModal
       :is-open="showActionModal"
       title="Gestión de Ciclo de Vida del Incidente"
-      :description="`Actualización de estado con SELECT ... FOR UPDATE para evitar condiciones de carrera en el folio ${actionTarget?.folio}.`"
-      confirm-text="Aplicar Transición ACID"
+      :description="`Actualización de estado con SELECT ... FOR UPDATE en el ticket ${actionTarget?.folio}.`"
+      confirm-text="Confirmar Cambio"
       :require-reason="true"
       :status-options="validStateTransitions"
       :analyst-options="catalogs.usuarios"
@@ -310,20 +284,18 @@ const isSubmitting = ref(false);
 const bannerMessage = ref('');
 const bannerType = ref('success');
 
-// Columnas para el DataGrid Inteligente
 const columns = [
   { key: 'folio', label: 'Folio' },
-  { key: 'titulo', label: 'Título del Incidente' },
+  { key: 'titulo', label: 'Título' },
   { key: 'categoria', label: 'Categoría' },
   { key: 'gravedad', label: 'Gravedad', align: 'center' },
   { key: 'estado', label: 'Estado', align: 'center' },
-  { key: 'sistema_nombre', label: 'Sistema PyME' },
+  { key: 'sistema_nombre', label: 'Activo' },
   { key: 'asignado_nombre', label: 'Asignado' },
   { key: 'precio_contratado', label: 'Costo Congelado', align: 'right' },
   { key: 'fecha_registro', label: 'Fecha' }
 ];
 
-// Estado de Modales
 const showCreateModal = ref(false);
 const showDetailModal = ref(false);
 const showActionModal = ref(false);
@@ -349,7 +321,6 @@ const minFutureDate = computed(() => {
   return now.toISOString().slice(0, 16);
 });
 
-// Opciones de transición según la máquina de estados estricta
 const validStateTransitions = computed(() => {
   const current = actionTarget.value?.estado || 'Open';
   if (current === 'Open') {
@@ -367,7 +338,7 @@ const validStateTransitions = computed(() => {
   }
   if (current === 'Resolved') {
     return [
-      { value: 'Closed', label: 'Cierre Definitivo de Ticket' },
+      { value: 'Closed', label: 'Cierre Definitivo' },
       { value: 'InProgress', label: 'Reabrir a En Proceso' }
     ];
   }
@@ -396,9 +367,7 @@ async function loadData() {
 function showBanner(msg, type = 'success') {
   bannerMessage.value = msg;
   bannerType.value = type;
-  setTimeout(() => {
-    bannerMessage.value = '';
-  }, 6000);
+  setTimeout(() => { bannerMessage.value = ''; }, 5000);
 }
 
 function openCreateModal() {
