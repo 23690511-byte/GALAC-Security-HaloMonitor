@@ -35,6 +35,7 @@ let timer = null;
 const currentTitle = computed(() => {
   const map = {
     'Dashboard': 'Dashboard & Monitoreo Transaccional',
+    'Users': 'Gestión de Usuarios y Roles (RBAC)',
     'Incidents': 'Gestión Integral de Incidentes',
     'Alerts': 'Motor de Alertas Internas',
     'Reports': 'Reportes Ejecutivos & Auditoría',

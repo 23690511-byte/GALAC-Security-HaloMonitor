@@ -34,6 +34,12 @@ $sql = "
 
 $params = [];
 
+// Filtro estricto de propiedad: Si el usuario es Cliente, solo consulta sus propios incidentes
+if ($user['rol'] === 'Cliente') {
+    $sql .= " AND i.usuario_reporta_id = :cliente_id";
+    $params[':cliente_id'] = (int)$user['id'];
+}
+
 if (!empty($search)) {
     $sql .= " AND (i.folio LIKE :search OR i.titulo LIKE :search OR i.categoria LIKE :search OR sm.nombre LIKE :search)";
     $params[':search'] = "%{$search}%";

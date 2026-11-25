@@ -1,15 +1,17 @@
 /**
- * HaloMonitor - Router con Navigation Guards y RBAC
- * Requisitos:
- * - meta: { requiresAuth: true, roles: [...] }
- * - Redirección de usuarios no autenticados a /login
- * - Redirección de usuarios sin permisos a vista permitida
+ * HaloMonitor - Router con Navigation Guards y RBAC Estricto
+ * Reglas de Acceso:
+ * - Administrador: Acceso Total (/dashboard, /users, /incidents, /alerts, /reports, /quality)
+ * - Analista: Acceso Operativo SOC (/dashboard, /incidents, /alerts, /reports, /quality)
+ * - Auditor: Acceso Solo Lectura (/dashboard, /incidents, /reports, /quality)
+ * - Cliente: Acceso Portal de Incidentes (/incidents)
  */
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
 
 import LoginView from '../views/LoginView.vue';
 import DashboardView from '../views/DashboardView.vue';
+import UsersView from '../views/UsersView.vue';
 import IncidentsView from '../views/IncidentsView.vue';
 import AlertsView from '../views/AlertsView.vue';
 import ReportsView from '../views/ReportsView.vue';
@@ -24,7 +26,11 @@ const routes = [
   },
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: (to) => {
+      const auth = useAuth();
+      const role = auth.user.value?.rol || '';
+      return (role.toLowerCase() === 'cliente') ? '/incidents' : '/dashboard';
+    }
   },
   {
     path: '/dashboard',
@@ -36,12 +42,21 @@ const routes = [
     }
   },
   {
+    path: '/users',
+    name: 'Users',
+    component: UsersView,
+    meta: {
+      requiresAuth: true,
+      roles: ['Administrador'] // Exclusivo Administrador
+    }
+  },
+  {
     path: '/incidents',
     name: 'Incidents',
     component: IncidentsView,
     meta: {
       requiresAuth: true,
-      roles: ['Administrador', 'Analista', 'Auditor']
+      roles: ['Administrador', 'Analista', 'Auditor', 'Cliente']
     }
   },
   {
@@ -73,7 +88,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/dashboard'
+    redirect: '/incidents'
   }
 ];
 
@@ -91,25 +106,26 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const isAuth = auth.isAuthenticated.value;
+  const userRole = auth.user.value?.rol || '';
 
-  // Si requiere autenticación y no está autenticado -> a Login
+  // 1. Si la ruta requiere autenticación y el usuario no está autenticado -> al Login
   if (to.meta.requiresAuth && !isAuth) {
     return next({ name: 'Login', query: { redirect: to.fullPath } });
   }
 
-  // Si ya está autenticado e intenta ir a login -> a Dashboard
+  // 2. Si ya está autenticado e intenta ir a Login -> a su vista principal
   if (to.name === 'Login' && isAuth) {
-    return next({ name: 'Dashboard' });
+    return next(userRole.toLowerCase() === 'cliente' ? { name: 'Incidents' } : { name: 'Dashboard' });
   }
 
-  // Validación de Roles RBAC
+  // 3. Validación de Roles RBAC
   if (to.meta.requiresAuth && to.meta.roles && to.meta.roles.length > 0) {
-    const userRole = auth.user.value?.rol || '';
     const hasRole = to.meta.roles.some(r => r.toLowerCase() === userRole.toLowerCase());
     
     if (!hasRole) {
-      alert(`Acceso Restringido: Su rol (${userRole}) no tiene permisos para acceder a esta sección.`);
-      return next({ name: 'Dashboard' });
+      // Redirigir a la vista permitida según el rol
+      const targetRoute = userRole.toLowerCase() === 'cliente' ? 'Incidents' : 'Dashboard';
+      return next({ name: targetRoute });
     }
   }
 

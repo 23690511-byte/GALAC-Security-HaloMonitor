@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(405, ['ok' => false, 'message' => 'Método no permitido. Utilice POST.']);
 }
 
-// 1. Verificación de Roles y Sesión Segura
-$user = requireRole(['Administrador', 'Analista']);
+// 1. Verificación de Roles y Sesión Segura (Administrador, Analista y Cliente PyME)
+$user = requireRole(['Administrador', 'Analista', 'Cliente']);
 $userId = (int)$user['id']; // Tomado estrictamente de la sesión
 
 $input = readJson();
@@ -35,7 +35,7 @@ $descripcion = trim($input['descripcion'] ?? '');
 $categoria = trim($input['categoria'] ?? 'Malware');
 $gravedad = trim($input['gravedad'] ?? 'Medium');
 $sistemaId = !empty($input['sistema_id']) ? (int)$input['sistema_id'] : null;
-$usuarioAsignadoId = !empty($input['usuario_asignado_id']) ? (int)$input['usuario_asignado_id'] : null;
+$usuarioAsignadoId = !empty($input['usuario_asignado_id']) ? (int)$input['usuario_asignado_id'] : 2; // Analista SOC asignado por defecto
 $costoEstimado = isset($input['costo_estimado']) ? (float)$input['costo_estimado'] : 2500.00;
 $fechaLimite = !empty($input['fecha_limite_atencion']) ? trim($input['fecha_limite_atencion']) : null;
 

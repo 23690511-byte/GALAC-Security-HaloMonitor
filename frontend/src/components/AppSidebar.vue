@@ -11,47 +11,80 @@
 
       <div class="brand-text">
         <span class="brand-name">GALAC</span>
-        <span class="brand-sub">SECURITY &bull; SOC</span>
+        <span class="brand-sub">SECURITY &bull; {{ currentPortalSubtitle }}</span>
       </div>
     </div>
 
-    <!-- Menú de Navegación Vertical -->
+    <!-- Menú de Navegación Vertical Dinámico según el Rol -->
     <nav class="sidebar-nav">
-      <!-- 1. Dashboard -->
-      <router-link to="/dashboard" class="nav-item" active-class="nav-item-active">
+      <!-- 1. Dashboard / Panel de Monitoreo (Admin, Analista, Auditor) -->
+      <router-link 
+        v-if="hasRole(['Administrador', 'Analista', 'Auditor'])" 
+        to="/dashboard" 
+        class="nav-item" 
+        active-class="nav-item-active"
+      >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
         </svg>
-        <span>Dashboard</span>
+        <span>{{ hasRole(['Auditor']) ? 'Panel de Cumplimiento' : (hasRole(['Administrador']) ? 'Panel Global' : 'Dashboard SOC') }}</span>
       </router-link>
 
-      <!-- 2. Gestión de Incidentes -->
+      <!-- 2. Gestión de Usuarios (EXCLUSIVO ADMINISTRADOR) -->
+      <router-link 
+        v-if="hasRole(['Administrador'])" 
+        to="/users" 
+        class="nav-item" 
+        active-class="nav-item-active"
+      >
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <span>Gestión de Usuarios</span>
+      </router-link>
+
+      <!-- 3. Incidentes (Adaptado por Rol) -->
       <router-link to="/incidents" class="nav-item" active-class="nav-item-active">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        <span>Gestión de Incidentes</span>
+        <span>{{ incidentMenuTitle }}</span>
       </router-link>
 
-      <!-- 3. Alertas Internas -->
-      <router-link v-if="hasRole(['Administrador', 'Analista'])" to="/alerts" class="nav-item" active-class="nav-item-active">
+      <!-- 4. Alertas Internas (Administrador y Analista) -->
+      <router-link 
+        v-if="hasRole(['Administrador', 'Analista'])" 
+        to="/alerts" 
+        class="nav-item" 
+        active-class="nav-item-active"
+      >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
-        <span class="nav-label">Alertas Internas</span>
+        <span class="nav-label">{{ hasRole(['Administrador']) ? 'Reglas de Alertas' : 'Alertas en Tiempo Real' }}</span>
         <span v-if="unreadAlertsCount > 0" class="badge-unread">{{ unreadAlertsCount }}</span>
       </router-link>
 
-      <!-- 4. Reportes e Historial -->
-      <router-link to="/reports" class="nav-item" active-class="nav-item-active">
+      <!-- 5. Reportes / Bitácora (Admin, Analista, Auditor) -->
+      <router-link 
+        v-if="hasRole(['Administrador', 'Analista', 'Auditor'])" 
+        to="/reports" 
+        class="nav-item" 
+        active-class="nav-item-active"
+      >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
         </svg>
-        <span>Reportes e Historial</span>
+        <span>{{ hasRole(['Auditor']) ? 'Reportes de Cumplimiento' : (hasRole(['Administrador']) ? 'Bitácora del Sistema' : 'Reportes Operativos') }}</span>
       </router-link>
 
-      <!-- 5. Métricas de Calidad -->
-      <router-link to="/quality" class="nav-item" active-class="nav-item-active">
+      <!-- 6. Métricas de Calidad CMMI / MoProSoft (Auditor, Analista, Admin) -->
+      <router-link 
+        v-if="hasRole(['Administrador', 'Analista', 'Auditor'])" 
+        to="/quality" 
+        class="nav-item" 
+        active-class="nav-item-active"
+      >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
         </svg>
@@ -59,7 +92,7 @@
       </router-link>
     </nav>
 
-    <!-- Pie del Sidebar: Usuario & Salir -->
+    <!-- Pie del Sidebar: Perfil de Usuario & Salir -->
     <div class="sidebar-footer">
       <div class="user-chip">
         <div class="user-details truncate">
@@ -86,6 +119,22 @@ const router = useRouter();
 const { user, hasRole, logout } = useAuth();
 const unreadAlertsCount = ref(3);
 
+const currentPortalSubtitle = computed(() => {
+  const r = (user.value?.rol || '').toLowerCase();
+  if (r.includes('admin')) return 'ADMIN';
+  if (r.includes('analista')) return 'SOC';
+  if (r.includes('auditor')) return 'AUDITOR';
+  return 'CLIENTE PyME';
+});
+
+const incidentMenuTitle = computed(() => {
+  const r = (user.value?.rol || '').toLowerCase();
+  if (r.includes('cliente')) return 'Mis Solicitudes / Tickets';
+  if (r.includes('analista')) return 'Triage de Incidentes';
+  if (r.includes('auditor')) return 'Consulta de Incidentes';
+  return 'Supervisión de Incidentes';
+});
+
 onMounted(async () => {
   if (hasRole(['Administrador', 'Analista'])) {
     try {
@@ -103,7 +152,8 @@ const roleClass = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
   if (r.includes('admin')) return 'role-admin';
   if (r.includes('analista')) return 'role-analista';
-  return 'role-auditor';
+  if (r.includes('auditor')) return 'role-auditor';
+  return 'role-cliente';
 });
 
 async function handleLogout() {
@@ -263,9 +313,10 @@ async function handleLogout() {
   text-transform: uppercase;
 }
 
-.role-admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
-.role-analista { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
-.role-auditor { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.role-admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+.role-analista { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+.role-auditor { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+.role-cliente { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
 
 .logout-btn {
   background: none;

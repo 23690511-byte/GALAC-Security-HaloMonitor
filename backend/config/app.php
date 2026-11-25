@@ -4,8 +4,12 @@
  * GALAC Security - Proyecto Web Final
  */
 
-// 1. Configuración Centralizada de Zona Horaria (Requisito 1)
+// 1. Configuración Centralizada de Zona Horaria (Requisito 1) y Codificación UTF-8
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'America/Mexico_City');
+ini_set('default_charset', 'UTF-8');
+if (function_exists('mb_internal_encoding')) {
+    mb_internal_encoding('UTF-8');
+}
 
 // 2. Manejo de Errores y Depuración
 $isDev = (getenv('APP_ENV') ?: 'development') === 'development';
