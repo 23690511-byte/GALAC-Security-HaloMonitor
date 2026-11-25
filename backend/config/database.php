@@ -31,6 +31,7 @@ function getDatabaseConnection(): PDO {
 
     try {
         $pdo = new PDO($dsn, $user, $pass, $options);
+        ensureDbIntegrity($pdo);
         return $pdo;
     } catch (PDOException $e) {
         // En caso de que se ejecute fuera de docker para pruebas locales, intentar con 127.0.0.1 y puertos 3307 / 3306
@@ -39,6 +40,7 @@ function getDatabaseConnection(): PDO {
                 try {
                     $dsnFallback = "mysql:host=127.0.0.1;port={$p};dbname={$dbname};charset={$charset}";
                     $pdo = new PDO($dsnFallback, $user, $pass, $options);
+                    ensureDbIntegrity($pdo);
                     return $pdo;
                 } catch (PDOException $fallbackEx) {
                     // Continuar probando
@@ -55,5 +57,57 @@ function getDatabaseConnection(): PDO {
             'data' => null
         ], JSON_UNESCAPED_UNICODE);
         exit;
+    }
+}
+
+/**
+ * Garantiza que el rol Cliente y la cuenta demo cliente@pyme.com existan en volúmenes persistentes
+ * y repara cadenas UTF-8 doblemente codificadas (ej. ExfiltraciÃ³n -> Exfiltración).
+ */
+function ensureDbIntegrity(PDO $pdo): void {
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+    $checked = true;
+
+    try {
+        // 1. Asegurar rol Cliente y usuario demo cliente@pyme.com
+        $stmtHasClient = $pdo->query("SELECT id FROM usuarios WHERE email = 'cliente@pyme.com' LIMIT 1");
+        if (!$stmtHasClient->fetch()) {
+            $pdo->exec("
+                INSERT IGNORE INTO roles (id, nombre, descripcion) VALUES
+                (4, 'Cliente', 'Cliente PyME: Registro de nuevos incidentes')
+            ");
+            $hash = password_hash('Cliente123!', PASSWORD_BCRYPT);
+            $stmtIns = $pdo->prepare("
+                INSERT IGNORE INTO usuarios (id, nombre, email, password_hash, rol_id, activo, departamento)
+                VALUES (4, 'Empresa PyME Demo (Cliente)', 'cliente@pyme.com', :hash, 4, 1, 'Operaciones PyME')
+            ");
+            $stmtIns->execute([':hash' => $hash]);
+        }
+
+        // 2. Reparar textos UTF-8 doblemente codificados en tablas principales (si existen)
+        $repairs = [
+            'incidentes'            => ['titulo', 'descripcion', 'categoria'],
+            'alertas'               => ['titulo', 'mensaje'],
+            'historial_solicitud'   => ['comentario'],
+            'reglas_alertas'        => ['nombre'],
+            'sistemas_monitoreados' => ['nombre', 'tipo'],
+            'usuarios'              => ['nombre', 'departamento'],
+            'roles'                 => ['descripcion']
+        ];
+
+        foreach ($repairs as $table => $cols) {
+            foreach ($cols as $col) {
+                $pdo->exec("
+                    UPDATE `{$table}`
+                    SET `{$col}` = CONVERT(BINARY(CONVERT(`{$col}` USING latin1)) USING utf8mb4)
+                    WHERE `{$col}` LIKE '%Ã%' OR `{$col}` LIKE '%Â%'
+                ");
+            }
+        }
+    } catch (Throwable $e) {
+        // Silencioso para no interrumpir la operación normal
     }
 }

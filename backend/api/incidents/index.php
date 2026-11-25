@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
-$user = requireAuth();
+$user = requireRole(['Administrador', 'Analista', 'Auditor']);
 $pdo = getDatabaseConnection();
 
 $search = getQueryParam('q', '');

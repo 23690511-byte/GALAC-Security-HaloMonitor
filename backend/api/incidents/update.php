@@ -24,7 +24,7 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'PATCH'], true)) {
     jsonResponse(405, ['ok' => false, 'message' => 'Método no permitido. Utilice POST, PUT o PATCH.']);
 }
 
-$user = requireRole(['Administrador', 'Analista', 'Cliente']);
+$user = requireRole(['Administrador', 'Analista']);
 $userId = (int)$user['id'];
 
 $input = readJson();
@@ -33,17 +33,6 @@ $nuevoEstado = isset($input['estado']) ? trim($input['estado']) : null;
 $nuevoAsignadoId = isset($input['usuario_asignado_id']) ? (int)$input['usuario_asignado_id'] : null;
 $comentario = trim($input['comentario'] ?? '');
 $nuevaGravedad = isset($input['gravedad']) ? trim($input['gravedad']) : null;
-
-// Validación de privilegios de Cliente: Solo puede cancelar sus tickets
-if ($user['rol'] === 'Cliente') {
-    if ($nuevoEstado !== 'Closed') {
-        jsonResponse(403, [
-            'ok' => false,
-            'message' => 'Acceso denegado: El cliente únicamente puede solicitar la cancelación de sus propios tickets.',
-            'data' => null
-        ]);
-    }
-}
 
 if ($incidenteId <= 0) {
     jsonResponse(422, [

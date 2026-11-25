@@ -10,19 +10,19 @@
         <span class="text-[10px] text-slate-400 font-mono">{{ pageSubheading }}</span>
       </div>
 
-      <!-- Botón de Nuevo Incidente / Reportar (Cliente, Analista, Administrador) -->
-      <div v-if="hasRole(['Administrador', 'Analista', 'Cliente'])">
+      <!-- Botón de Nuevo Incidente (Solo Admin y Analista; el Cliente ya tiene el formulario directo en pantalla) -->
+      <div v-if="hasRole(['Administrador', 'Analista'])">
         <button @click="openCreateModal" class="btn-cyber-primary text-xs py-1 px-3">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
-          {{ hasRole(['Cliente']) ? '+ Reportar Incidente' : '+ Nuevo Incidente' }}
+          + Nuevo Incidente
         </button>
       </div>
     </div>
 
     <!-- Banner de Feedback -->
-    <div v-if="bannerMessage" :class="bannerType === 'error' ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'" class="p-2 rounded border text-xs flex items-center justify-between">
+    <div v-if="bannerMessage" :class="bannerType === 'error' ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'" class="p-2.5 rounded border text-xs flex items-center justify-between">
       <div class="flex items-center gap-1.5">
         <span class="font-bold">{{ bannerType === 'error' ? 'Error:' : 'Operación Exitosa:' }}</span>
         <span>{{ bannerMessage }}</span>
@@ -30,12 +30,95 @@
       <button @click="bannerMessage = ''" class="hover:text-white">&times;</button>
     </div>
 
-    <!-- DataGrid de Incidentes -->
-    <div class="cyber-card p-3.5 bg-[#0d172e]">
+    <!-- VISTA EXCLUSIVA CLIENTE: Únicamente formulario para Crear Nuevo Incidente -->
+    <div v-if="hasRole(['Cliente'])" class="max-w-2xl mx-auto mt-4">
+      <div class="cyber-card p-5 bg-[#0d172e] border border-cyan-500/25 rounded-xl">
+        <div class="flex items-center gap-2 pb-3 mb-4 border-b border-sky-950/80">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">Reportar Nuevo Incidente de Seguridad</h2>
+            <p class="text-[11px] text-slate-400">Complete los datos del incidente para notificar de inmediato al Centro de Operaciones (SOC).</p>
+          </div>
+        </div>
+
+        <form @submit.prevent="submitClientIncident" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-300 uppercase mb-1 text-[11px]">Título del Incidente / Problema:</label>
+            <input 
+              type="text" 
+              v-model="createForm.titulo" 
+              placeholder="Ej. Servidor de Facturación no responde / Sospecha de Ransomware" 
+              required
+              class="cyber-input text-xs py-2"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-300 uppercase mb-1 text-[11px]">Categoría:</label>
+              <select v-model="createForm.categoria" class="cyber-select text-xs py-2">
+                <option value="Malware">Malware / Ransomware</option>
+                <option value="Intrusión">Intento de Intrusión</option>
+                <option value="Escaneo">Escaneo de Puertos</option>
+                <option value="Fuga de Datos">Fuga de Datos</option>
+                <option value="Disponibilidad">Falla de Disponibilidad</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 uppercase mb-1 text-[11px]">Nivel de Severidad:</label>
+              <select v-model="createForm.gravedad" class="cyber-select text-xs py-2">
+                <option value="Low">Low (Bajo - Informativo)</option>
+                <option value="Medium">Medium (Medio - Degradación)</option>
+                <option value="High">High (Alto - Afectación Operativa)</option>
+                <option value="Critical">Critical (Crítico - Ataque Activo)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 uppercase mb-1 text-[11px]">Sistema o Activo Afectado:</label>
+            <select v-model="createForm.sistema_id" class="cyber-select text-xs py-2">
+              <option :value="null">-- Seleccionar Activo --</option>
+              <option v-for="s in catalogs.sistemas" :key="s.id" :value="s.id">
+                {{ s.nombre }} ({{ s.ip_host }})
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 uppercase mb-1 text-[11px]">Descripción Detallada de la Anomalía:</label>
+            <textarea 
+              v-model="createForm.descripcion" 
+              rows="4" 
+              placeholder="Describa qué ocurrió, a qué hora comenzó y qué impacto tiene en su empresa..." 
+              required
+              class="cyber-textarea text-xs py-2"
+            ></textarea>
+          </div>
+
+          <div class="p-2.5 bg-cyan-950/30 border border-cyan-800/40 rounded text-[11px] text-slate-400">
+            &bull; Su reporte será asignado automáticamente al equipo de guardia SOC y quedará registrado con trazabilidad inmutable.
+          </div>
+
+          <div class="flex justify-end pt-2 border-t border-sky-950/80">
+            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary text-xs py-2 px-5 font-bold">
+              <span v-if="isSubmitting">Enviando Reporte...</span>
+              <span v-else>Enviar Reporte de Incidente</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- DataGrid de Incidentes (Solo Administrador, Analista y Auditor) -->
+    <div v-else class="cyber-card p-3.5 bg-[#0d172e]">
       <DataGrid
         :data="incidents"
         :columns="columns"
-        :search-placeholder="hasRole(['Cliente']) ? 'Buscar en mis tickets por folio o título...' : 'Buscar incidente por folio, título o activo...'"
+        search-placeholder="Buscar incidente por folio, título o activo..."
         export-title="Incidentes_HaloMonitor"
       >
         <template #cell-gravedad="{ value }">
@@ -60,7 +143,7 @@
 
         <template #actions="{ row }">
           <div class="flex items-center justify-end gap-1.5">
-            <!-- 1. Ver Historial (Para todos los roles) -->
+            <!-- 1. Ver Historial -->
             <button 
               @click="viewDetail(row)"
               class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
@@ -77,16 +160,6 @@
               title="Cambiar estado de ciclo de vida o reasignar"
             >
               Gestionar
-            </button>
-
-            <!-- 3. Cancelar Ticket Propio (Exclusivo Cliente si estado es Open) -->
-            <button 
-              v-if="hasRole(['Cliente']) && row.estado === 'Open'"
-              @click="openCancelModal(row)"
-              class="btn-cancel-ticket py-0.5 px-2 text-[10px]"
-              title="Solicitar cancelación de esta solicitud"
-            >
-              Cancelar
             </button>
           </div>
         </template>
@@ -376,7 +449,7 @@ const cancelReason = ref('');
 
 const pageHeading = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
-  if (r.includes('cliente')) return 'Mis Solicitudes de Incidentes (Portal PyME)';
+  if (r.includes('cliente')) return 'Reportar Nuevo Incidente (Portal Cliente)';
   if (r.includes('analista')) return 'Triage de Incidentes & Operaciones SOC';
   if (r.includes('auditor')) return 'Consulta de Incidentes & Trazabilidad (Solo Lectura)';
   return 'Supervisión Global de Incidentes';
@@ -384,7 +457,7 @@ const pageHeading = computed(() => {
 
 const pageSubheading = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
-  if (r.includes('cliente')) return 'Reporta incidencias, consulta el estado de atención y gestiona tus tickets contratados.';
+  if (r.includes('cliente')) return 'Portal exclusivo para levantar nuevos reportes de incidentes hacia el equipo SOC.';
   if (r.includes('analista')) return 'Mesa de ayuda y respuesta a incidentes con transiciones ACID y concurrencia pesimista.';
   if (r.includes('auditor')) return 'Auditoría inmutable de transiciones y snapshot de precios congelados.';
   return 'Control integral de incidentes, asignación a analistas y resolución transaccional.';
@@ -435,6 +508,17 @@ const validStateTransitions = computed(() => {
 
 async function loadData() {
   try {
+    if (hasRole(['Cliente'])) {
+      const catRes = await incidentsApi.getCatalogs();
+      if (catRes?.ok) {
+        catalogs.value = catRes.data || { usuarios: [], sistemas: [] };
+        if (!createForm.value.sistema_id && catalogs.value.sistemas.length > 0) {
+          createForm.value.sistema_id = catalogs.value.sistemas[0].id;
+        }
+      }
+      return;
+    }
+
     const [incRes, catRes] = await Promise.all([
       incidentsApi.getIncidents(),
       incidentsApi.getCatalogs()
@@ -472,6 +556,30 @@ function openCreateModal() {
     costo_estimado: 3500.00
   };
   showCreateModal.value = true;
+}
+
+async function submitClientIncident() {
+  isSubmitting.value = true;
+  try {
+    const res = await incidentsApi.createIncident(createForm.value);
+    if (res?.ok) {
+      showBanner(res.message || `Incidente ${res.data?.folio || ''} reportado exitosamente al SOC.`, 'success');
+      createForm.value = {
+        titulo: '',
+        descripcion: '',
+        categoria: 'Malware',
+        gravedad: 'Medium',
+        sistema_id: catalogs.value.sistemas[0]?.id || null,
+        usuario_asignado_id: null,
+        fecha_limite_atencion: '',
+        costo_estimado: 3500.00
+      };
+    }
+  } catch (err) {
+    showBanner(err.message, 'error');
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 async function submitCreateIncident() {

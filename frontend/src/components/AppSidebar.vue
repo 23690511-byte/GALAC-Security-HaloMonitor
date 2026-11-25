@@ -129,7 +129,7 @@ const currentPortalSubtitle = computed(() => {
 
 const incidentMenuTitle = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
-  if (r.includes('cliente')) return 'Mis Solicitudes / Tickets';
+  if (r.includes('cliente')) return 'Nuevo Incidente';
   if (r.includes('analista')) return 'Triage de Incidentes';
   if (r.includes('auditor')) return 'Consulta de Incidentes';
   return 'Supervisión de Incidentes';
