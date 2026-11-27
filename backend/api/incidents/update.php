@@ -74,7 +74,8 @@ try {
         rollbackJson($pdo, 409, "Conflicto en máquina de estados: La transición de '{$estadoActual}' a '{$estadoFinal}' no es permitida.");
     }
 
-    $asignadoFinal = ($nuevoAsignadoId !== null) ? $nuevoAsignadoId : $incidente['usuario_asignado_id'];
+    // Solo el Administrador puede reasignar analistas; el Analista no puede reasignar responsabilidades
+    $asignadoFinal = ($user['rol'] === 'Administrador' && $nuevoAsignadoId !== null) ? $nuevoAsignadoId : $incidente['usuario_asignado_id'];
     $gravedadFinal = ($nuevaGravedad !== null) ? $nuevaGravedad : $incidente['gravedad'];
     $fechaCierre = ($estadoFinal === 'Closed') ? date('Y-m-d H:i:s') : $incidente['fecha_cierre'];
 

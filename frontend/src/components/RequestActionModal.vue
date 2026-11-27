@@ -26,8 +26,8 @@
           </select>
         </div>
 
-        <!-- Asignación de Analista (si aplica) -->
-        <div v-if="analystOptions && analystOptions.length > 0" class="field-group">
+        <!-- Asignación de Analista (si aplica y si tiene permiso) -->
+        <div v-if="analystOptions && analystOptions.length > 0 && canAssign" class="field-group">
           <label class="field-label">Asignar Operador / Analista:</label>
           <select v-model="formData.assignedId" class="saas-select">
             <option :value="null">-- Sin asignar --</option>
@@ -95,6 +95,7 @@ const props = defineProps({
   analystOptions: { type: Array, default: () => [] },
   initialStatus: { type: String, default: '' },
   initialAssigned: { type: [Number, String], default: null },
+  canAssign: { type: Boolean, default: true },
   isSubmitting: { type: Boolean, default: false }
 });
 

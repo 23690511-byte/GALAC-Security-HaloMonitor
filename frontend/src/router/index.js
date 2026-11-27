@@ -15,7 +15,6 @@ import UsersView from '../views/UsersView.vue';
 import IncidentsView from '../views/IncidentsView.vue';
 import AlertsView from '../views/AlertsView.vue';
 import ReportsView from '../views/ReportsView.vue';
-import QualityMetricsView from '../views/QualityMetricsView.vue';
 
 const routes = [
   {
@@ -72,15 +71,6 @@ const routes = [
     path: '/reports',
     name: 'Reports',
     component: ReportsView,
-    meta: {
-      requiresAuth: true,
-      roles: ['Administrador', 'Analista', 'Auditor']
-    }
-  },
-  {
-    path: '/quality',
-    name: 'Quality',
-    component: QualityMetricsView,
     meta: {
       requiresAuth: true,
       roles: ['Administrador', 'Analista', 'Auditor']

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
-$user = requireAuth();
+$user = requireRole(['Administrador']);
 $pdo = getDatabaseConnection();
 
 // Listado de Usuarios

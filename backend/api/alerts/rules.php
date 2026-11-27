@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../helpers/auth.php';
 $pdo = getDatabaseConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    requireAuth();
+    requireRole(['Administrador', 'Analista']);
     $stmt = $pdo->query("
         SELECT r.*, u.nombre AS creador_nombre 
         FROM reglas_alertas r

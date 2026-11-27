@@ -62,14 +62,7 @@
             Reportes e Historial
           </router-link>
 
-          <!-- Calidad CMMI / MoProSoft (PDF 3) -->
-          <router-link 
-            to="/quality" 
-            class="nav-link"
-            active-class="nav-link-active"
-          >
-            Métricas de Calidad
-          </router-link>
+
         </nav>
 
         <!-- Perfil de Usuario y Acciones -->

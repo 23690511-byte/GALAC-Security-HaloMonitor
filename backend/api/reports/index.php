@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
-$user = requireAuth();
+$user = requireRole(['Administrador', 'Analista', 'Auditor']);
 $pdo = getDatabaseConnection();
 
 // 1. Reporte Completo de Incidentes con tiempos de resolución
@@ -30,21 +30,24 @@ $stmt = $pdo->query("
 ");
 $incidentesReport = $stmt->fetchAll();
 
-// 2. Historial Global de Auditoría (Trazabilidad estricta)
-$stmtAudit = $pdo->query("
-    SELECT h.id, h.incidente_id, h.estado_anterior, h.estado_nuevo, h.comentario,
-           h.ip_origen, h.fecha_registro,
-           i.folio AS incidente_folio,
-           u.nombre AS usuario_nombre,
-           r.nombre AS usuario_rol
-    FROM historial_solicitud h
-    JOIN incidentes i ON h.incidente_id = i.id
-    JOIN usuarios u ON h.usuario_id = u.id
-    JOIN roles r ON u.rol_id = r.id
-    ORDER BY h.fecha_registro DESC
-    LIMIT 200
-");
-$historialAudit = $stmtAudit->fetchAll();
+// 2. Historial Global de Auditoría (Trazabilidad estricta) - Solo Administrador y Auditor
+$historialAudit = [];
+if ($user['rol'] === 'Administrador' || $user['rol'] === 'Auditor') {
+    $stmtAudit = $pdo->query("
+        SELECT h.id, h.incidente_id, h.estado_anterior, h.estado_nuevo, h.comentario,
+               h.ip_origen, h.fecha_registro,
+               i.folio AS incidente_folio,
+               u.nombre AS usuario_nombre,
+               r.nombre AS usuario_rol
+        FROM historial_solicitud h
+        JOIN incidentes i ON h.incidente_id = i.id
+        JOIN usuarios u ON h.usuario_id = u.id
+        JOIN roles r ON u.rol_id = r.id
+        ORDER BY h.fecha_registro DESC
+        LIMIT 200
+    ");
+    $historialAudit = $stmtAudit->fetchAll();
+}
 
 // 3. Indicadores de Calidad MoProSoft / CMMI Nivel 2 y 3 (Gestión & Medición Cuantitativa)
 $totalIncidentes = count($incidentesReport);

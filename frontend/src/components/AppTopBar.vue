@@ -38,8 +38,7 @@ const currentTitle = computed(() => {
     'Users': 'Gestión de Usuarios y Roles (RBAC)',
     'Incidents': 'Gestión Integral de Incidentes',
     'Alerts': 'Motor de Alertas Internas',
-    'Reports': 'Reportes Ejecutivos & Auditoría',
-    'Quality': 'Métricas CMMI & MoProSoft'
+    'Reports': 'Reportes Ejecutivos & Auditoría'
   };
   return map[route.name] || 'Consola SOC';
 });

@@ -10,8 +10,8 @@
         <span class="text-[10px] text-slate-400 font-mono">{{ pageSubheading }}</span>
       </div>
 
-      <!-- Botón de Nuevo Incidente (Solo Admin y Analista; el Cliente ya tiene el formulario directo en pantalla) -->
-      <div v-if="hasRole(['Administrador', 'Analista'])">
+      <!-- Botón de Nuevo Incidente (Solo Administrador; el Cliente tiene su formulario directo y el Analista opera el SOC) -->
+      <div v-if="hasRole(['Administrador'])">
         <button @click="openCreateModal" class="btn-cyber-primary text-xs py-1 px-3">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -147,9 +147,9 @@
             <button 
               @click="viewDetail(row)"
               class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
-              :title="hasRole(['Auditor']) ? 'Auditar trazabilidad y datos congelados' : 'Ver bitácora de auditoría'"
+              title="Ver bitácora de auditoría e historial"
             >
-              {{ hasRole(['Auditor']) ? 'Auditar' : 'Historial' }}
+              Historial
             </button>
 
             <!-- 2. Gestionar Estado (Exclusivo Administrador y Analista) -->
@@ -355,6 +355,7 @@
       :description="`Actualización de estado con SELECT ... FOR UPDATE en el ticket ${actionTarget?.folio}.`"
       confirm-text="Confirmar Cambio"
       :require-reason="true"
+      :can-assign="hasRole(['Administrador'])"
       :status-options="validStateTransitions"
       :analyst-options="catalogs.usuarios"
       :initial-status="actionTarget?.estado"

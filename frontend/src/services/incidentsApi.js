@@ -29,6 +29,6 @@ export const incidentsApi = {
   },
 
   async getCatalogs() {
-    return apiFetch('/users/index.php', { method: 'GET' });
+    return apiFetch('/incidents/catalogs.php', { method: 'GET' });
   }
 };

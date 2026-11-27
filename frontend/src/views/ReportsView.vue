@@ -19,6 +19,7 @@
           Incidentes
         </button>
         <button 
+          v-if="hasRole(['Administrador', 'Auditor'])"
           @click="activeTab = 'auditoria'" 
           :class="activeTab === 'auditoria' ? 'bg-cyan-500/20 text-cyan-300 font-bold border-cyan-400/40' : 'text-slate-400 hover:text-white'"
           class="px-2.5 py-1 rounded text-[11px] border border-transparent transition-all"
@@ -117,10 +118,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useAuth } from '../composables/useAuth';
 import { reportsApi } from '../services/reportsApi';
 import DataGrid from '../components/DataGrid.vue';
 import RequestStatusBadge from '../components/RequestStatusBadge.vue';
 
+const { hasRole } = useAuth();
 const activeTab = ref('incidentes');
 const incidentes = ref([]);
 const auditoria = ref([]);
