@@ -443,6 +443,7 @@ const columns = [
   { key: 'gravedad', label: 'Gravedad', align: 'center' },
   { key: 'estado', label: 'Estado', align: 'center' },
   { key: 'sistema_nombre', label: 'Activo' },
+  { key: 'reporta_nombre', label: 'Reporta' },
   { key: 'asignado_nombre', label: 'Asignado' },
   { key: 'precio_contratado', label: 'Costo Congelado', align: 'right' },
   { key: 'fecha_registro', label: 'Fecha' }

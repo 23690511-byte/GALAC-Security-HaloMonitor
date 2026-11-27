@@ -22,12 +22,29 @@ $nombre = trim($input['nombre'] ?? '');
 $email = trim($input['email'] ?? '');
 $password = trim($input['password'] ?? '');
 $rolId = isset($input['rol_id']) ? (int)$input['rol_id'] : 4; // Por defecto Cliente
-$departamento = trim($input['departamento'] ?? 'Operaciones');
+$departamento = trim($input['departamento'] ?? '');
+$activo = isset($input['activo']) ? ((int)$input['activo'] === 0 ? 0 : 1) : 1;
 
-if (empty($nombre) || empty($email) || empty($password)) {
+if (empty($nombre) || empty($email) || empty($password) || empty($departamento)) {
     jsonResponse(422, [
         'ok' => false,
-        'message' => 'Campos obligatorios incompletos: Nombre, Correo electrónico y Contraseña son requeridos.',
+        'message' => 'Campos obligatorios incompletos: Nombre, Correo electrónico, Contraseña y Departamento/Empresa son requeridos.',
+        'data' => null
+    ]);
+}
+
+if (strlen($password) < 8) {
+    jsonResponse(422, [
+        'ok' => false,
+        'message' => 'La contraseña debe tener al menos 8 caracteres.',
+        'data' => null
+    ]);
+}
+
+if (!in_array($rolId, [1, 2, 3, 4], true)) {
+    jsonResponse(422, [
+        'ok' => false,
+        'message' => 'El rol seleccionado no es válido.',
         'data' => null
     ]);
 }
@@ -58,7 +75,7 @@ $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
 $stmtInsert = $pdo->prepare("
     INSERT INTO usuarios (nombre, email, password_hash, rol_id, activo, departamento, creado_en)
-    VALUES (:nombre, :email, :pass, :rol_id, 1, :depto, NOW())
+    VALUES (:nombre, :email, :pass, :rol_id, :activo, :depto, NOW())
 ");
 
 $stmtInsert->execute([
@@ -66,6 +83,7 @@ $stmtInsert->execute([
     ':email'    => $email,
     ':pass'     => $passwordHash,
     ':rol_id'   => $rolId,
+    ':activo'   => $activo,
     ':depto'    => $departamento
 ]);
 

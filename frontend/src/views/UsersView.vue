@@ -93,6 +93,13 @@
 
         <template #actions="{ row }">
           <div class="flex items-center justify-end gap-1.5">
+            <button
+              @click="openEditModal(row)"
+              class="btn-action-history"
+              title="Editar rol o departamento del usuario"
+            >
+              Editar
+            </button>
             <button 
               @click="handleToggleStatus(row)"
               :class="Number(row.activo) === 1 ? 'btn-toggle-suspend' : 'btn-toggle-activate'"
@@ -145,41 +152,54 @@
 
           <!-- Contraseña Inicial -->
           <div>
-            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Contraseña Inicial:</label>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Contraseña Inicial (Mínimo 8 caracteres):</label>
             <input 
               type="password" 
               v-model="newUser.password" 
               required 
-              placeholder="Mínimo 6 caracteres" 
-              class="w-full bg-[#080f1e] border border-sky-950 rounded p-2 text-slate-100 focus:border-cyan-400 outline-none text-xs"
+              minlength="8"
+              placeholder="Mínimo 8 caracteres" 
+              class="cyber-input text-xs py-2"
             />
           </div>
 
-          <!-- Rol Asignado -->
+          <!-- Rol Asignado y Estado -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Rol Asignado:</label>
               <select 
                 v-model="newUser.rol_id" 
-                class="w-full bg-[#080f1e] border border-sky-950 rounded p-2 text-slate-100 focus:border-cyan-400 outline-none text-xs"
+                class="cyber-select text-xs py-2"
               >
-                <option :value="4">Cliente (PyME)</option>
-                <option :value="2">Analista (SOC)</option>
-                <option :value="3">Auditor (Cumplimiento)</option>
-                <option :value="1">Administrador (Total)</option>
+                <option :value="1">ADMINISTRADOR</option>
+                <option :value="2">ANALISTA</option>
+                <option :value="3">AUDITOR</option>
+                <option :value="4">CLIENTE</option>
               </select>
             </div>
 
-            <!-- Departamento -->
             <div>
-              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Departamento:</label>
-              <input 
-                type="text" 
-                v-model="newUser.departamento" 
-                placeholder="Ej. Operaciones" 
-                class="w-full bg-[#080f1e] border border-sky-950 rounded p-2 text-slate-100 focus:border-cyan-400 outline-none text-xs"
-              />
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Estado Inicial:</label>
+              <select 
+                v-model="newUser.activo" 
+                class="cyber-select text-xs py-2"
+              >
+                <option :value="1">Activo</option>
+                <option :value="0">Inactivo</option>
+              </select>
             </div>
+          </div>
+
+          <!-- Departamento / Empresa -->
+          <div>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Departamento / Empresa:</label>
+            <input 
+              type="text" 
+              v-model="newUser.departamento" 
+              required
+              placeholder="Ej. Operaciones SOC / Facturación PyME" 
+              class="cyber-input text-xs py-2"
+            />
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-3 border-t border-sky-950/80">
@@ -189,6 +209,52 @@
             <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary py-1 px-4 text-xs font-bold">
               <span v-if="isSubmitting">Creando...</span>
               <span v-else>Guardar Usuario</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: Editar Rol y Departamento -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+      <div class="modal-content max-w-md p-0">
+        <div class="flex items-center justify-between p-3 border-b border-sky-950/80 bg-[#080f1e] rounded-t-lg">
+          <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider">
+            Editar Cuenta: {{ editUser.email }}
+          </h3>
+          <button @click="showEditModal = false" class="text-slate-400 hover:text-white">&times;</button>
+        </div>
+
+        <form @submit.prevent="submitEditUser" class="p-4 space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Nombre Completo:</label>
+            <input type="text" v-model="editUser.nombre" required class="cyber-input text-xs py-2" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Rol RBAC:</label>
+              <select v-model="editUser.rol_id" class="cyber-select text-xs py-2">
+                <option :value="1">ADMINISTRADOR</option>
+                <option :value="2">ANALISTA</option>
+                <option :value="3">AUDITOR</option>
+                <option :value="4">CLIENTE</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 uppercase mb-0.5 text-[11px]">Departamento / Empresa:</label>
+              <input type="text" v-model="editUser.departamento" required class="cyber-input text-xs py-2" />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-sky-950/80">
+            <button type="button" @click="showEditModal = false" class="btn-cyber-secondary py-1 px-3 text-xs">
+              Cancelar
+            </button>
+            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary py-1 px-4 text-xs font-bold">
+              <span v-if="isSubmitting">Guardando...</span>
+              <span v-else>Actualizar Usuario</span>
             </button>
           </div>
         </form>
@@ -206,6 +272,7 @@ const users = ref([]);
 const bannerMessage = ref('');
 const bannerType = ref('success');
 const showCreateModal = ref(false);
+const showEditModal = ref(false);
 const isSubmitting = ref(false);
 
 const newUser = ref({
@@ -213,7 +280,16 @@ const newUser = ref({
   email: '',
   password: '',
   rol_id: 4, // Cliente por defecto
-  departamento: 'Operaciones PyME'
+  departamento: '',
+  activo: 1
+});
+
+const editUser = ref({
+  id: null,
+  nombre: '',
+  email: '',
+  rol_id: 4,
+  departamento: ''
 });
 
 const columns = [
@@ -270,9 +346,40 @@ function openCreateModal() {
     email: '',
     password: '',
     rol_id: 4,
-    departamento: 'Operaciones PyME'
+    departamento: '',
+    activo: 1
   };
   showCreateModal.value = true;
+}
+
+function openEditModal(row) {
+  editUser.value = {
+    id: row.id,
+    nombre: row.nombre,
+    email: row.email,
+    rol_id: Number(row.rol_id),
+    departamento: row.departamento || ''
+  };
+  showEditModal.value = true;
+}
+
+async function submitEditUser() {
+  isSubmitting.value = true;
+  bannerMessage.value = '';
+  try {
+    const res = await usersApi.updateUser(editUser.value);
+    if (res?.ok) {
+      bannerType.value = 'success';
+      bannerMessage.value = res.message || 'Usuario actualizado exitosamente.';
+      showEditModal.value = false;
+      await loadUsers();
+    }
+  } catch (err) {
+    bannerType.value = 'error';
+    bannerMessage.value = err.message || 'Ocurrió un error al actualizar el usuario.';
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 async function submitCreateUser() {

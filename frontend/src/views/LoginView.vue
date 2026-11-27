@@ -185,8 +185,10 @@
 
         <!-- Encabezado de la Tarjeta -->
         <div class="card-headings-group">
-          <h2 class="card-main-title">Iniciar sesión</h2>
-          <p class="card-main-subtitle">Ingresa tus credenciales para acceder a la plataforma</p>
+          <h2 class="card-main-title">{{ isRegisterMode ? 'Registro de Cliente PyME' : 'Iniciar sesión' }}</h2>
+          <p class="card-main-subtitle">
+            {{ isRegisterMode ? 'Crea tu cuenta corporativa para reportar incidentes al SOC' : 'Ingresa tus credenciales para acceder a la plataforma' }}
+          </p>
         </div>
 
         <!-- Alerta de Error -->
@@ -195,7 +197,7 @@
         </div>
 
         <!-- Formulario de Autenticación -->
-        <form @submit.prevent="handleSubmit" class="login-inputs-form">
+        <form v-if="!isRegisterMode" @submit.prevent="handleSubmit" class="login-inputs-form">
           <!-- Campo 1: Correo electrónico -->
           <div class="input-form-field">
             <label class="field-label">Correo electrónico</label>
@@ -258,10 +260,103 @@
               </svg>
             </span>
           </button>
+
+          <!-- Enlace para Autorregistro de Cliente PyME -->
+          <div class="register-switch-row">
+            <button type="button" @click="toggleMode(true)" class="register-switch-link">
+              ¿Eres una empresa cliente nueva? <strong>Regístrate aquí</strong>
+            </button>
+          </div>
+        </form>
+
+        <!-- Formulario de Autorregistro Público de Cliente PyME -->
+        <form v-else @submit.prevent="handleRegister" class="login-inputs-form">
+          <div class="input-form-field">
+            <label class="field-label">Nombre Completo o Razón Social</label>
+            <div class="field-input-wrapper">
+              <input
+                type="text"
+                v-model="regForm.nombre"
+                placeholder="Ej. Comercializadora Norte S.A. de C.V."
+                required
+                class="field-native-input"
+              />
+            </div>
+          </div>
+
+          <div class="input-form-field">
+            <label class="field-label">Correo Electrónico Corporativo</label>
+            <div class="field-input-wrapper">
+              <input
+                type="email"
+                v-model="regForm.email"
+                placeholder="contacto@tuempresa.com"
+                required
+                class="field-native-input"
+              />
+            </div>
+          </div>
+
+          <div class="input-form-field">
+            <label class="field-label">Departamento o Área</label>
+            <div class="field-input-wrapper">
+              <input
+                type="text"
+                v-model="regForm.departamento"
+                placeholder="Ej. Facturación, Sistemas, Contabilidad"
+                required
+                class="field-native-input"
+              />
+            </div>
+          </div>
+
+          <div class="input-form-field">
+            <label class="field-label">Contraseña (mínimo 8 caracteres)</label>
+            <div class="field-input-wrapper">
+              <input
+                type="password"
+                v-model="regForm.password"
+                placeholder="••••••••"
+                required
+                minlength="8"
+                class="field-native-input"
+              />
+            </div>
+          </div>
+
+          <div class="input-form-field">
+            <label class="field-label">Confirmar Contraseña</label>
+            <div class="field-input-wrapper">
+              <input
+                type="password"
+                v-model="regForm.confirm_password"
+                placeholder="••••••••"
+                required
+                minlength="8"
+                class="field-native-input"
+              />
+            </div>
+          </div>
+
+          <button type="submit" :disabled="isLoading" class="login-action-btn">
+            <span v-if="isLoading">Registrando cuenta...</span>
+            <span v-else class="btn-inner-content">
+              <span>Crear Cuenta Cliente PyME</span>
+              <svg class="btn-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+              </svg>
+            </span>
+          </button>
+
+          <div class="register-switch-row">
+            <button type="button" @click="toggleMode(false)" class="register-switch-link">
+              ¿Ya tienes una cuenta? <strong>Inicia sesión aquí</strong>
+            </button>
+          </div>
         </form>
 
         <!-- Accesos Demo (Idéntico a la segunda imagen de referencia + Cliente) -->
-        <div class="demo-logins-block">
+        <div v-if="!isRegisterMode" class="demo-logins-block">
           <span class="demo-legend-title">Ingresar como usuario demo:</span>
           <div class="demo-pills-row">
             <!-- Administrador (Púrpura) -->
@@ -277,7 +372,7 @@
             <!-- Analista (Azul) -->
             <button 
               type="button" 
-              @click="setRole('analista@halomonitor.com', 'Analista123!')" 
+              @click="setRole('roberto.analista@halomonitor.com', 'Analista123!')" 
               class="role-pill-btn pill-analista"
               title="Acceso operativo como Analista SOC"
             >
@@ -287,7 +382,7 @@
             <!-- Auditor (Ámbar) -->
             <button 
               type="button" 
-              @click="setRole('auditor@halomonitor.com', 'Auditor123!')" 
+              @click="setRole('carlos.auditor@halomonitor.com', 'Auditor123!')" 
               class="role-pill-btn pill-auditor"
               title="Acceso solo lectura como Auditor"
             >
@@ -297,7 +392,7 @@
             <!-- Cliente (Verde) -->
             <button 
               type="button" 
-              @click="setRole('cliente@pyme.com', 'Cliente123!')" 
+              @click="setRole('cliente@pymedemo.com', 'Cliente123!')" 
               class="role-pill-btn pill-cliente"
               title="Acceso cliente PyME: reporte de incidentes propios"
             >
@@ -317,13 +412,27 @@ import { useAuth } from '../composables/useAuth';
 
 const router = useRouter();
 const route = useRoute();
-const { login, isLoading } = useAuth();
+const { login, register, isLoading } = useAuth();
 
-const email = ref('analista@halomonitor.com');
+const isRegisterMode = ref(false);
+const email = ref('roberto.analista@halomonitor.com');
 const password = ref('Analista123!');
 const rememberMe = ref(true);
 const showPassword = ref(false);
 const errorMessage = ref('');
+
+const regForm = ref({
+  nombre: '',
+  email: '',
+  departamento: '',
+  password: '',
+  confirm_password: ''
+});
+
+function toggleMode(registerMode) {
+  isRegisterMode.value = registerMode;
+  errorMessage.value = '';
+}
 
 function setRole(userEmail, userPass) {
   email.value = userEmail;
@@ -335,10 +444,10 @@ async function handleSubmit() {
   errorMessage.value = '';
   try {
     const res = await login(email.value, password.value);
-    const userRole = res?.user?.rol || '';
+    const userRole = res?.data?.user?.rol || res?.user?.rol || '';
     
     // Enrutamiento realista según el rol:
-    if (userRole === 'Cliente') {
+    if (userRole.toLowerCase() === 'cliente') {
       router.push('/incidents');
     } else {
       const redirect = route.query.redirect || '/dashboard';
@@ -346,6 +455,25 @@ async function handleSubmit() {
     }
   } catch (err) {
     errorMessage.value = err.message || 'Credenciales inválidas. Verifique su correo o contraseña.';
+  }
+}
+
+async function handleRegister() {
+  errorMessage.value = '';
+  if (regForm.value.password.length < 8) {
+    errorMessage.value = 'La contraseña debe tener al menos 8 caracteres.';
+    return;
+  }
+  if (regForm.value.password !== regForm.value.confirm_password) {
+    errorMessage.value = 'Las contraseñas no coinciden.';
+    return;
+  }
+
+  try {
+    await register({ ...regForm.value });
+    router.push('/incidents');
+  } catch (err) {
+    errorMessage.value = err.message || 'No se pudo completar el registro.';
   }
 }
 </script>
@@ -915,6 +1043,29 @@ async function handleSubmit() {
   transform: translateY(-1px);
   filter: brightness(0.96);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.register-switch-row {
+  text-align: center;
+  margin-top: 0.45rem;
+}
+
+.register-switch-link {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.register-switch-link strong {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.register-switch-link:hover {
+  color: #e2e8f0;
 }
 
 @media (max-width: 960px) {

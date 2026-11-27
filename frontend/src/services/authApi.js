@@ -11,6 +11,13 @@ export const authApi = {
     });
   },
 
+  async register(payload) {
+    return apiFetch('/auth/register.php', {
+      method: 'POST',
+      body: payload
+    });
+  },
+
   async logout() {
     return apiFetch('/auth/logout.php', {
       method: 'POST'

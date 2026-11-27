@@ -72,19 +72,81 @@ function ensureDbIntegrity(PDO $pdo): void {
     $checked = true;
 
     try {
-        // 1. Asegurar rol Cliente y usuario demo cliente@pyme.com
-        $stmtHasClient = $pdo->query("SELECT id FROM usuarios WHERE email = 'cliente@pyme.com' LIMIT 1");
-        if (!$stmtHasClient->fetch()) {
-            $pdo->exec("
-                INSERT IGNORE INTO roles (id, nombre, descripcion) VALUES
-                (4, 'Cliente', 'Cliente PyME: Registro de nuevos incidentes')
-            ");
-            $hash = password_hash('Cliente123!', PASSWORD_BCRYPT);
-            $stmtIns = $pdo->prepare("
-                INSERT IGNORE INTO usuarios (id, nombre, email, password_hash, rol_id, activo, departamento)
-                VALUES (4, 'Empresa PyME Demo (Cliente)', 'cliente@pyme.com', :hash, 4, 1, 'Operaciones PyME')
-            ");
-            $stmtIns->execute([':hash' => $hash]);
+        // 1. Asegurar los 4 roles base RBAC
+        $pdo->exec("
+            INSERT IGNORE INTO roles (id, nombre, descripcion) VALUES
+            (1, 'Administrador', 'Acceso total al sistema, gestión de usuarios, incidentes, alertas y bitácora'),
+            (2, 'Analista', 'Operación SOC: atención de incidentes, alertas y reportes operativos'),
+            (3, 'Auditor', 'Solo lectura ejecutiva: supervisión de incidentes, métricas y bitácora SQL'),
+            (4, 'Cliente', 'Cliente PyME: Portal exclusivo de reporte de nuevos incidentes')
+        ");
+
+        // 2. Asegurar los 5 usuarios iniciales solicitados (con password_hash bcrypt)
+        $seedUsers = [
+            [
+                'nombre'       => 'Gerardo Axel Castillo Balderas',
+                'email'        => 'admin@halomonitor.com',
+                'password'     => 'Admin123!',
+                'rol_id'       => 1,
+                'departamento' => 'Dirección / SOC'
+            ],
+            [
+                'nombre'       => 'Luis Roberto Martínez Méndez',
+                'email'        => 'roberto.analista@halomonitor.com',
+                'password'     => 'Analista123!',
+                'rol_id'       => 2,
+                'departamento' => 'Operaciones SOC'
+            ],
+            [
+                'nombre'       => 'Luis Antonio Ponce Navarro',
+                'email'        => 'antonio.analista@halomonitor.com',
+                'password'     => 'Analista123!',
+                'rol_id'       => 2,
+                'departamento' => 'Arquitectura / SOC'
+            ],
+            [
+                'nombre'       => 'Carlos Reyes Manuel',
+                'email'        => 'carlos.auditor@halomonitor.com',
+                'password'     => 'Auditor123!',
+                'rol_id'       => 3,
+                'departamento' => 'Calidad y Cumplimiento'
+            ],
+            [
+                'nombre'       => 'Empresa PyME Demo (Contabilidad)',
+                'email'        => 'cliente@pymedemo.com',
+                'password'     => 'Cliente123!',
+                'rol_id'       => 4,
+                'departamento' => 'Contabilidad / PyME'
+            ]
+        ];
+
+        $stmtCheckUser = $pdo->prepare("SELECT id FROM usuarios WHERE email = :email LIMIT 1");
+        $stmtInsertUser = $pdo->prepare("
+            INSERT INTO usuarios (nombre, email, password_hash, rol_id, activo, departamento, creado_en)
+            VALUES (:nombre, :email, :hash, :rol_id, 1, :depto, NOW())
+        ");
+        $stmtUpdateAdmin = $pdo->prepare("
+            UPDATE usuarios SET nombre = :nombre, departamento = :depto WHERE email = :email
+        ");
+
+        foreach ($seedUsers as $su) {
+            $stmtCheckUser->execute([':email' => $su['email']]);
+            $existing = $stmtCheckUser->fetch();
+            if (!$existing) {
+                $stmtInsertUser->execute([
+                    ':nombre' => $su['nombre'],
+                    ':email'  => $su['email'],
+                    ':hash'   => password_hash($su['password'], PASSWORD_BCRYPT),
+                    ':rol_id' => $su['rol_id'],
+                    ':depto'  => $su['departamento']
+                ]);
+            } elseif ($su['email'] === 'admin@halomonitor.com') {
+                $stmtUpdateAdmin->execute([
+                    ':nombre' => $su['nombre'],
+                    ':depto'  => $su['departamento'],
+                    ':email'  => $su['email']
+                ]);
+            }
         }
 
         // 2. Reparar textos UTF-8 doblemente codificados en tablas principales (si existen)

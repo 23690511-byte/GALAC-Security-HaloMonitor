@@ -50,6 +50,21 @@ export function useAuth() {
     }
   }
 
+  async function register(payload) {
+    isLoading.value = true;
+    try {
+      const res = await authApi.register(payload);
+      if (res?.ok && res?.data?.user) {
+        currentUser.value = res.data.user;
+        authInitialized.value = true;
+        return res;
+      }
+      throw new Error(res?.message || 'Error al registrar la cuenta');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   async function logout() {
     try {
       await authApi.logout();
@@ -74,6 +89,7 @@ export function useAuth() {
     authInitialized,
     checkAuth,
     login,
+    register,
     logout,
     hasRole
   };
