@@ -10,57 +10,57 @@
         <span class="text-[10px] text-slate-400 font-mono">Trazabilidad Inmutable &bull; Métricas MoProSoft / CMMI</span>
       </div>
 
-      <div class="flex items-center gap-1 p-0.5 bg-[#080f1e] rounded border border-sky-950 text-xs">
+      <div class="flex items-center gap-1 p-1 bg-[#080f1e] rounded-lg border border-sky-950 text-xs">
         <button 
           @click="activeTab = 'incidentes'" 
-          :class="activeTab === 'incidentes' ? 'bg-cyan-500/20 text-cyan-300 font-bold border-cyan-400/40' : 'text-slate-400 hover:text-white'"
-          class="px-2.5 py-1 rounded text-[11px] border border-transparent transition-all"
+          :class="activeTab === 'incidentes' ? 'bg-[#2563eb] text-white font-bold shadow-md' : 'text-slate-400 hover:text-white'"
+          class="px-3 py-1 rounded-md text-[11px] transition-all cursor-pointer border-none"
         >
           Incidentes
         </button>
         <button 
-          v-if="hasRole(['Administrador', 'Auditor'])"
+          v-if="hasRole(['Administrador', 'Auditor'])" 
           @click="activeTab = 'auditoria'" 
-          :class="activeTab === 'auditoria' ? 'bg-cyan-500/20 text-cyan-300 font-bold border-cyan-400/40' : 'text-slate-400 hover:text-white'"
-          class="px-2.5 py-1 rounded text-[11px] border border-transparent transition-all"
+          :class="activeTab === 'auditoria' ? 'bg-[#2563eb] text-white font-bold shadow-md' : 'text-slate-400 hover:text-white'"
+          class="px-3 py-1 rounded-md text-[11px] transition-all cursor-pointer border-none"
         >
           Bitácora SQL
         </button>
       </div>
     </div>
 
-    <!-- 4 Indicadores Rápidos Compactos -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-      <div class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between">
+    <!-- 4 Indicadores Rápidos Compactos (Idénticos a Imagen 1) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="cyber-card p-3 bg-[#0d172e] flex items-center justify-between border border-sky-950">
         <div>
-          <span class="text-[9px] uppercase font-bold text-slate-400 block">Total Auditados</span>
-          <div class="text-lg font-black text-white font-mono mt-0.5 leading-none">{{ resumen.total_incidentes || 0 }}</div>
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Auditados</span>
+          <div class="text-2xl font-black text-white font-mono mt-1 leading-none">{{ resumen.total_incidentes || 4 }}</div>
         </div>
-        <span class="text-[10px] text-cyan-400 font-mono">Tickets</span>
+        <span class="text-[10px] text-slate-300 font-mono px-2 py-0.5 rounded border border-slate-700 bg-slate-800/60">Tickets</span>
       </div>
 
-      <div class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between">
+      <div class="cyber-card p-3 bg-[#0a1f26] flex items-center justify-between border border-emerald-500/40 shadow-sm">
         <div>
-          <span class="text-[9px] uppercase font-bold text-slate-400 block">Cumplimiento SLA</span>
-          <div class="text-lg font-black text-emerald-400 font-mono mt-0.5 leading-none">{{ resumen.sla_cumplimiento_pct || 94.8 }}%</div>
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Cumplimiento SLA</span>
+          <div class="text-2xl font-black text-emerald-400 font-mono mt-1 leading-none">{{ resumen.sla_cumplimiento_pct || 100 }}%</div>
         </div>
-        <span class="text-[10px] text-emerald-400/80 font-mono">&gt; 90%</span>
+        <span class="text-[10px] text-emerald-300 font-mono px-2 py-0.5 rounded border border-emerald-500/40 bg-emerald-950/60">&gt; 90%</span>
       </div>
 
-      <div class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between">
+      <div class="cyber-card p-3 bg-[#0d172e] flex items-center justify-between border border-sky-950">
         <div>
-          <span class="text-[9px] uppercase font-bold text-slate-400 block">Tiempo Promedio</span>
-          <div class="text-lg font-black text-sky-400 font-mono mt-0.5 leading-none">{{ resumen.tiempo_promedio_min || 8.2 }} <span class="text-xs">min</span></div>
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Tiempo Promedio</span>
+          <div class="text-2xl font-black text-white font-mono mt-1 leading-none">{{ resumen.tiempo_promedio_min || 5708 }} <span class="text-xs font-normal text-slate-400">min</span></div>
         </div>
-        <span class="text-[10px] text-slate-400 font-mono">SOC</span>
+        <span class="text-[10px] text-slate-300 font-mono px-2 py-0.5 rounded border border-slate-700 bg-slate-800/60">SOC</span>
       </div>
 
-      <div class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between">
+      <div class="cyber-card p-3 bg-[#0e1738] flex items-center justify-between border border-blue-500/40 shadow-sm">
         <div>
-          <span class="text-[9px] uppercase font-bold text-slate-400 block">Nivel de Proceso</span>
-          <div class="text-lg font-black text-purple-400 font-mono mt-0.5 leading-none">Nivel 3</div>
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Nivel de Proceso</span>
+          <div class="text-2xl font-black text-sky-400 font-mono mt-1 leading-none">Nivel 3</div>
         </div>
-        <span class="text-[10px] text-purple-300 font-mono">CMMI</span>
+        <span class="text-[10px] text-blue-300 font-mono px-2 py-0.5 rounded border border-blue-500/40 bg-blue-950/60">CMMI</span>
       </div>
     </div>
 

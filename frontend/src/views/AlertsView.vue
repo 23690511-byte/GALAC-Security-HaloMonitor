@@ -14,49 +14,55 @@
         <button 
           v-if="alerts.some(a => !a.leida)" 
           @click="markAllRead" 
-          class="btn-cyber-secondary text-xs py-1 px-2.5"
+          class="btn-cyber-secondary text-xs py-1 px-2.5 flex items-center gap-1.5"
         >
-          Marcar Todas Leídas
+          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>Marcar Todas Leídas</span>
         </button>
 
         <button 
           v-if="hasRole(['Administrador'])" 
           @click="showRuleModal = true" 
-          class="btn-cyber-primary text-xs py-1 px-2.5"
+          class="btn-cyber-primary text-xs py-1 px-2.5 flex items-center gap-1.5"
         >
-          + Nueva Regla
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>+ Nueva Regla</span>
         </button>
       </div>
     </div>
 
-    <!-- Filtros de Severidad en una Sola Fila -->
-    <div class="flex items-center gap-1.5 text-xs">
+    <!-- Filtros de Severidad en una Sola Fila (Píldoras Redondas Oficiales) -->
+    <div class="flex items-center gap-2 text-xs">
       <span class="text-[11px] text-slate-400 uppercase font-semibold mr-1">Filtrar:</span>
       <button 
         @click="filterSeverity = ''" 
-        :class="filterSeverity === '' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
-        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
+        :class="filterSeverity === '' ? 'bg-[#2563eb] text-white font-bold border-[#3b82f6]' : 'bg-[#080f1e] text-slate-400 border-sky-950 hover:text-white'"
+        class="py-1 px-3 rounded-full border text-[11px] transition-all cursor-pointer"
       >
         Todas ({{ alerts.length }})
       </button>
       <button 
         @click="filterSeverity = 'Critical'" 
-        :class="filterSeverity === 'Critical' ? 'bg-rose-500/30 text-rose-300 border-rose-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
-        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
+        :class="filterSeverity === 'Critical' ? 'bg-[#ef4444] text-white font-bold border-[#ef4444]' : 'bg-[#080f1e] text-slate-400 border-sky-950 hover:text-rose-400'"
+        class="py-1 px-3 rounded-full border text-[11px] transition-all cursor-pointer"
       >
         Critical
       </button>
       <button 
         @click="filterSeverity = 'High'" 
-        :class="filterSeverity === 'High' ? 'bg-orange-500/30 text-orange-300 border-orange-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
-        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
+        :class="filterSeverity === 'High' ? 'bg-[#f97316] text-white font-bold border-[#f97316]' : 'bg-[#080f1e] text-slate-400 border-sky-950 hover:text-orange-400'"
+        class="py-1 px-3 rounded-full border text-[11px] transition-all cursor-pointer"
       >
         High
       </button>
       <button 
         @click="filterSeverity = 'Medium'" 
-        :class="filterSeverity === 'Medium' ? 'bg-amber-500/30 text-amber-300 border-amber-500/60' : 'bg-[#080f1e] text-slate-400 border-sky-950'"
-        class="py-0.5 px-2.5 rounded border text-[11px] transition-colors"
+        :class="filterSeverity === 'Medium' ? 'bg-[#f59e0b] text-white font-bold border-[#f59e0b]' : 'bg-[#080f1e] text-slate-400 border-sky-950 hover:text-amber-400'"
+        class="py-1 px-3 rounded-full border text-[11px] transition-all cursor-pointer"
       >
         Medium
       </button>
@@ -71,15 +77,18 @@
       <div 
         v-for="al in filteredAlerts" 
         :key="al.id"
-        class="cyber-card p-2.5 bg-[#0d172e] flex items-center justify-between gap-3 transition-colors"
-        :class="{ 'border-rose-500/40 bg-rose-950/15': al.gravedad === 'Critical' && !al.leida, 'opacity-70': al.leida }"
+        class="alert-card transition-colors"
+        :class="[
+          `alert-border-${al.gravedad.toLowerCase()}`,
+          { 'opacity-70': al.leida }
+        ]"
       >
         <div class="flex items-center gap-2.5 truncate">
           <span :class="['severity-badge text-[9px] shrink-0', `severity-${al.gravedad.toLowerCase()}`]">
             {{ al.gravedad }}
           </span>
 
-          <span v-if="!al.leida" class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shrink-0">
+          <span v-if="!al.leida" class="badge-nueva shrink-0">
             NUEVA
           </span>
 
@@ -87,16 +96,23 @@
           <span class="text-xs text-slate-300 hidden md:inline truncate">&bull; {{ al.mensaje }}</span>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0 text-xs">
+        <div class="flex items-center gap-2.5 shrink-0 text-xs">
           <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">{{ al.fecha_emision }}</span>
           <button 
             v-if="!al.leida" 
             @click="markRead(al.id)" 
-            class="btn-cyber-primary py-0.5 px-2 text-[10px]"
+            class="btn-cyber-secondary py-0.5 px-2 text-[10px] flex items-center gap-1 hover:text-white"
           >
-            Leída
+            <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Leída</span>
           </button>
-          <span v-else class="text-[10px] text-slate-500 font-mono">&check;</span>
+          <span v-else class="text-emerald-400 font-bold text-xs flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+          </span>
         </div>
       </div>
     </div>

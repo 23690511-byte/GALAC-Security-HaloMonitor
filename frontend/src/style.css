@@ -349,3 +349,371 @@ code, pre, .font-mono {
   border-radius: 8px;
   padding: 0.75rem 0.9rem;
 }
+
+/* ============================================================
+   ESTILOS OFICIALES SOC HALOMONITOR (Idénticos a las Capturas)
+   ============================================================ */
+
+/* Botones de Exportación Oficiales (Excel Verde Sólido, PDF Rojo Sólido) */
+.btn-excel {
+  background: #059669 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #10b981 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35) !important;
+}
+.btn-excel:hover {
+  background: #047857 !important;
+  filter: brightness(1.15) !important;
+}
+
+.btn-pdf {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #f43f5e !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35) !important;
+}
+.btn-pdf:hover {
+  background: #be123c !important;
+  filter: brightness(1.15) !important;
+}
+
+/* Botones de Acción de Tabla (Historial y Gestionar Oficiales) */
+.btn-action-history {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+  font-size: 0.7rem !important;
+  padding: 0.25rem 0.6rem !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+.btn-action-history:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.btn-action-manage {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.7rem !important;
+  padding: 0.25rem 0.65rem !important;
+  border-radius: 4px !important;
+  border: 1px solid #0ea5e9 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+  white-space: nowrap !important;
+}
+.btn-action-manage:hover {
+  background: #0369a1 !important;
+  filter: brightness(1.15) !important;
+}
+
+/* Botones Cyber Primario y Secundario */
+.btn-cyber-primary {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #3b82f6 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+.btn-cyber-primary:hover {
+  background: #1d4ed8 !important;
+  filter: brightness(1.1) !important;
+}
+.btn-cyber-primary:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.btn-cyber-secondary {
+  background: #080f1e !important;
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+.btn-cyber-secondary:hover {
+  background: #0d172e !important;
+  color: #ffffff !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+}
+
+/* Tarjetas Dark Cyber SOC */
+.cyber-card {
+  background: #0d172e !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Controles de Formulario Cyber */
+.cyber-input, .cyber-select, .cyber-textarea {
+  width: 100% !important;
+  background: #080f1e !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  padding: 0.45rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  outline: none !important;
+  transition: border-color 0.18s ease !important;
+  font-family: inherit !important;
+}
+.cyber-input:focus, .cyber-select:focus, .cyber-textarea:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
+}
+.cyber-input::placeholder, .cyber-textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Tarjetas de Alertas Oficiales (Captura 2) */
+.alert-card {
+  background: #0d172e !important;
+  border: 1px solid rgba(56, 189, 248, 0.15) !important;
+  border-radius: 8px !important;
+  padding: 0.65rem 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  margin-bottom: 0.45rem !important;
+}
+.alert-border-critical {
+  border-left: 4px solid #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, #0d172e 100%) !important;
+}
+.alert-border-high {
+  border-left: 4px solid #f97316 !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.1) 0%, #0d172e 100%) !important;
+}
+.alert-border-medium {
+  border-left: 4px solid #f59e0b !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, #0d172e 100%) !important;
+}
+.alert-border-low {
+  border-left: 4px solid #0284c7 !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  background: linear-gradient(90deg, rgba(2, 132, 199, 0.1) 0%, #0d172e 100%) !important;
+}
+
+.badge-nueva {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  border-radius: 9999px !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  padding: 0.12rem 0.5rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+.severity-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.15rem 0.5rem !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  border-radius: 4px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
+}
+.severity-critical { background: #ef4444 !important; color: #ffffff !important; }
+.severity-high { background: #f97316 !important; color: #ffffff !important; }
+.severity-medium { background: #f59e0b !important; color: #ffffff !important; }
+.severity-low { background: #0284c7 !important; color: #ffffff !important; }
+
+/* Modales */
+.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(2, 6, 23, 0.85) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 1rem !important;
+}
+.modal-content {
+  background: #0d172e !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  border-radius: 12px !important;
+  width: 100% !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Clases de Utilidad Tailwind Emuladas */
+.space-y-1 > * + * { margin-top: 0.25rem !important; }
+.space-y-1-5 > * + *, .space-y-1\.5 > * + * { margin-top: 0.375rem !important; }
+.space-y-2 > * + * { margin-top: 0.5rem !important; }
+.space-y-2-5 > * + *, .space-y-2\.5 > * + * { margin-top: 0.625rem !important; }
+.space-y-3 > * + * { margin-top: 0.75rem !important; }
+.space-y-4 > * + * { margin-top: 1rem !important; }
+
+.p-1 { padding: 0.25rem !important; }
+.p-1-5, .p-1\.5 { padding: 0.375rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-2-5, .p-2\.5 { padding: 0.625rem !important; }
+.p-3 { padding: 0.75rem !important; }
+.p-3-5, .p-3\.5 { padding: 0.875rem !important; }
+.p-4 { padding: 1rem !important; }
+.p-5 { padding: 1.25rem !important; }
+.p-6 { padding: 1.5rem !important; }
+
+.py-0-5, .py-0\.5 { padding-top: 0.125rem !important; padding-bottom: 0.125rem !important; }
+.py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+.py-1-5, .py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.py-2-5, .py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+
+.px-1 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+.px-1-5, .px-1\.5 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
+.px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.px-2-5, .px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+.px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+.px-3-5, .px-3\.5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.px-5 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+
+.pb-1 { padding-bottom: 0.25rem !important; }
+.pb-2 { padding-bottom: 0.5rem !important; }
+.pb-3 { padding-bottom: 0.75rem !important; }
+.pt-1 { padding-top: 0.25rem !important; }
+.pt-2 { padding-top: 0.5rem !important; }
+
+.mb-0-5, .mb-0\.5 { margin-bottom: 0.125rem !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 0.75rem !important; }
+.mb-4 { margin-bottom: 1rem !important; }
+.mt-0-5, .mt-0\.5 { margin-top: 0.125rem !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-4 { margin-top: 1rem !important; }
+.mx-auto { margin-left: auto !important; margin-right: auto !important; }
+
+.max-w-xs { max-width: 20rem !important; }
+.max-w-sm { max-width: 24rem !important; }
+.max-w-md { max-width: 28rem !important; }
+.max-w-lg { max-width: 32rem !important; }
+.max-w-xl { max-width: 36rem !important; }
+.max-w-2xl { max-width: 42rem !important; }
+.max-w-full { max-width: 100% !important; }
+
+.text-\[9px\] { font-size: 9px !important; }
+.text-\[10px\] { font-size: 10px !important; }
+.text-\[11px\] { font-size: 11px !important; }
+.text-xs { font-size: 0.75rem !important; }
+.text-sm { font-size: 0.875rem !important; }
+.text-base { font-size: 1rem !important; }
+.text-lg { font-size: 1.125rem !important; }
+.text-xl { font-size: 1.25rem !important; }
+
+.font-medium { font-weight: 500 !important; }
+.font-semibold { font-weight: 600 !important; }
+.font-bold { font-weight: 700 !important; }
+.font-black { font-weight: 900 !important; }
+.uppercase { text-transform: uppercase !important; }
+.tracking-wider { letter-spacing: 0.05em !important; }
+
+.text-white { color: #ffffff !important; }
+.text-slate-200 { color: #e2e8f0 !important; }
+.text-slate-300 { color: #cbd5e1 !important; }
+.text-slate-400 { color: #94a3b8 !important; }
+.text-slate-500 { color: #64748b !important; }
+.text-cyan-300 { color: #67e8f9 !important; }
+.text-cyan-400 { color: #22d3ee !important; }
+.text-emerald-300 { color: #6ee7b7 !important; }
+.text-emerald-400 { color: #34d399 !important; }
+.text-amber-300 { color: #fcd34d !important; }
+.text-amber-400 { color: #fbbf24 !important; }
+.text-rose-300 { color: #fca5a5 !important; }
+.text-rose-400 { color: #f87171 !important; }
+.text-purple-300 { color: #d8b4fe !important; }
+.text-purple-400 { color: #c084fc !important; }
+.text-sky-400 { color: #38bdf8 !important; }
+
+.bg-\[\#070d19\] { background-color: #070d19 !important; }
+.bg-\[\#080f1e\] { background-color: #080f1e !important; }
+.bg-\[\#091224\] { background-color: #091224 !important; }
+.bg-\[\#0a1224\] { background-color: #0a1224 !important; }
+.bg-\[\#0b1428\] { background-color: #0b1428 !important; }
+.bg-\[\#0d172e\] { background-color: #0d172e !important; }
+.bg-\[\#0f172a\] { background-color: #0f172a !important; }
+.bg-\[\#14203d\] { background-color: #14203d !important; }
+
+.border { border-width: 1px !important; }
+.border-b { border-bottom-width: 1px !important; }
+.border-t { border-top-width: 1px !important; }
+.border-sky-950, .border-sky-950\/80, .border-sky-950\/60 { border-color: rgba(12, 74, 110, 0.45) !important; }
+.border-cyan-500\/25, .border-cyan-400\/40, .border-cyan-400\/50 { border-color: rgba(34, 211, 238, 0.35) !important; }
+
+.rounded-sm { border-radius: 2px !important; }
+.rounded { border-radius: 4px !important; }
+.rounded-md { border-radius: 6px !important; }
+.rounded-lg { border-radius: 8px !important; }
+.rounded-xl { border-radius: 12px !important; }
+.rounded-full { border-radius: 9999px !important; }
+
+.divide-y > * + * { border-top-width: 1px !important; border-top-color: rgba(12, 74, 110, 0.4) !important; }
+.overflow-x-auto { overflow-x: auto !important; }
+.overflow-y-auto { overflow-y: auto !important; }
+.overflow-hidden { overflow: hidden !important; }

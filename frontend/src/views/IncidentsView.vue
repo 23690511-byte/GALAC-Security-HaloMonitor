@@ -99,14 +99,19 @@
             ></textarea>
           </div>
 
-          <div class="p-2.5 bg-cyan-950/30 border border-cyan-800/40 rounded text-[11px] text-slate-400">
-            &bull; Su reporte será asignado automáticamente al equipo de guardia SOC y quedará registrado con trazabilidad inmutable.
-          </div>
-
-          <div class="flex justify-end pt-2 border-t border-sky-950/80">
-            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary text-xs py-2 px-5 font-bold">
+          <div class="flex items-center justify-between pt-2 border-t border-sky-950/80">
+            <span class="text-[11px] text-amber-400 font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
+              Su reporte será asignado automáticamente al equipo de guardia SOC y quedará registrado con trazabilidad inmutable.
+            </span>
+            <button type="submit" :disabled="isSubmitting" class="btn-cyber-primary text-xs py-2 px-5 font-bold flex items-center gap-1.5 shadow-lg">
               <span v-if="isSubmitting">Enviando Reporte...</span>
-              <span v-else>Enviar Reporte de Incidente</span>
+              <template v-else>
+                <span>Enviar Reporte de Incidente</span>
+                <svg class="w-3.5 h-3.5 rotate-45 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+              </template>
             </button>
           </div>
         </form>
@@ -143,23 +148,29 @@
 
         <template #actions="{ row }">
           <div class="flex items-center justify-end gap-1.5">
-            <!-- 1. Ver Historial -->
+            <!-- 1. Ver Historial con Ícono Oficial -->
             <button 
               @click="viewDetail(row)"
-              class="btn-cyber-secondary py-0.5 px-2 text-[10px]"
+              class="btn-action-history"
               title="Ver bitácora de auditoría e historial"
             >
-              Historial
+              <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Historial</span>
             </button>
 
-            <!-- 2. Gestionar Estado (Exclusivo Administrador y Analista) -->
+            <!-- 2. Gestionar Estado (Exclusivo Administrador y Analista) con Ícono Oficial -->
             <button 
               v-if="hasRole(['Administrador', 'Analista'])"
               @click="openActionModal(row)"
-              class="btn-cyber-primary py-0.5 px-2 text-[10px]"
+              class="btn-action-manage"
               title="Cambiar estado de ciclo de vida o reasignar"
             >
-              Gestionar
+              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              <span>Gestionar</span>
             </button>
           </div>
         </template>
@@ -451,16 +462,12 @@ const cancelReason = ref('');
 const pageHeading = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
   if (r.includes('cliente')) return 'Reportar Nuevo Incidente (Portal Cliente)';
-  if (r.includes('analista')) return 'Triage de Incidentes & Operaciones SOC';
-  if (r.includes('auditor')) return 'Consulta de Incidentes & Trazabilidad (Solo Lectura)';
   return 'Supervisión Global de Incidentes';
 });
 
 const pageSubheading = computed(() => {
   const r = (user.value?.rol || '').toLowerCase();
   if (r.includes('cliente')) return 'Portal exclusivo para levantar nuevos reportes de incidentes hacia el equipo SOC.';
-  if (r.includes('analista')) return 'Mesa de ayuda y respuesta a incidentes con transiciones ACID y concurrencia pesimista.';
-  if (r.includes('auditor')) return 'Auditoría inmutable de transiciones y snapshot de precios congelados.';
   return 'Control integral de incidentes, asignación a analistas y resolución transaccional.';
 });
 

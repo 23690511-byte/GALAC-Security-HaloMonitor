@@ -36,28 +36,28 @@
           </select>
         </div>
 
-        <!-- Botón Exportar a Excel -->
+        <!-- Botón Exportar a Excel (Verde Sólido Oficial) -->
         <button 
           type="button" 
           @click="exportToExcel" 
-          class="btn-cyber-secondary text-[11px] py-1 px-2.5"
+          class="btn-excel text-[11px] py-1 px-2.5 font-bold"
           title="Descargar datos filtrados en Excel (CSV UTF-8)"
         >
-          <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
             <path d="M8 12l2.5 3.5L8 19h1.8l1.6-2.5 1.6 2.5h1.8L12.3 15.5 14.8 12H13l-1.6 2.5L9.8 12z"/>
           </svg>
           Excel
         </button>
 
-        <!-- Botón Exportar a PDF -->
+        <!-- Botón Exportar a PDF (Rojo/Rosa Sólido Oficial) -->
         <button 
           type="button" 
           @click="exportToPdf" 
-          class="btn-cyber-secondary text-[11px] py-1 px-2.5"
+          class="btn-pdf text-[11px] py-1 px-2.5 font-bold"
           title="Generar reporte PDF"
         >
-          <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
           </svg>
           PDF
